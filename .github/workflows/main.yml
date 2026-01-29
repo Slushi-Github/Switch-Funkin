@@ -1,0 +1,190 @@
+# This is a basic workflow to help you get started with Actions
+name: Build
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ main, experimental ]
+  pull_request:
+    branches: [ main, experimental ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  buildLinux:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4.1.7
+      - uses: krdlab/setup-haxe@master
+        with:
+          haxe-version: 4.3.4
+      # Runs a set of commands using the runners shell
+      - name: Install Haxelib
+        run: |
+          sudo apt-get install libvlc-dev
+          sudo apt-get install libvlccore-dev
+          haxelib setup ~/haxelib
+          haxelib install hxcpp > /dev/null --quiet
+          chmod +x ./setup/unix.sh
+          sh ./setup/unix.sh
+      - name: Skip SScript setup mode
+        run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> ~/settings.cocoa
+      - name: Create Version Tag
+        run: echo "${{github.run_id}}" > VERSION
+      - name: Compile
+        run: haxelib run lime build Project.xml linux --app-version="4.0.0-${{ github.run_id}}" -D officialBuild
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: linuxBuild
+          path: 'export/release/linux/bin'
+  buildWindows:
+    runs-on: windows-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4.1.7
+      - uses: krdlab/setup-haxe@master
+        with:
+          haxe-version: 4.3.4
+      # Runs a set of commands using the runners shell
+      - name: Install Haxelib
+        run: |
+          haxelib setup C:/haxelib
+          haxelib install hxcpp > /dev/null --quiet
+          .\"setup/windows.bat"
+        shell: cmd
+      - name: Skip SScript setup mode
+        run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> %USERPROFILE%/settings.cocoa
+        shell: cmd
+      - name: Create Version Tag
+        run: echo "${{github.run_id}}" > VERSION
+      - name: Compile
+        run: haxelib run lime build windows --app-version="4.0.0-${{ github.run_id}}"  -D officialBuild
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: windowsBuild
+          path: export/release/windows/bin
+  buildMac:
+    runs-on: macos-15
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4.1.7
+      - uses: krdlab/setup-haxe@master
+        with:
+          haxe-version: 4.3.4
+      # Runs a set of commands using the runners shell
+      - name: Install Haxelib
+        run: |
+          haxelib setup ~/haxelib
+          haxelib install hxcpp > /dev/null --quiet
+          chmod +x ./setup/unix.sh
+          sh ./setup/unix.sh
+      - name: Skip SScript setup mode
+        run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> ~/settings.cocoa
+      - name: Create Version Tag
+        run: echo "${{github.run_id}}" > VERSION
+      - name: Compile
+        run: haxelib run lime build mac --app-version="4.0.0-${{ github.run_id}}"  -D officialBuild
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: macBuild
+          path: export/release/macos/bin
+  buildSwitch:
+    runs-on: ubuntu-latest
+    container: devkitpro/devkita64:latest
+    steps:
+      - name: Checkout Project Repository
+        uses: actions/checkout@v4
+      
+      - name: Install Haxe 4.3.4
+        run: |
+          apt-get update
+          apt-get install -y wget git neko libgc-dev
+          
+          echo === DOWNLOADING HAXE FROM GITHUB ===
+          wget https://github.com/HaxeFoundation/haxe/releases/download/4.3.4/haxe-4.3.4-linux64.tar.gz
+          mkdir haxe_temp
+          tar -xf haxe-4.3.4-linux64.tar.gz -C haxe_temp
+          cp -r haxe_temp/haxe_*/* /usr/local/bin/
+          echo =========
+          echo === UPDATING HAXELIB ===
+          mkdir -p ~/haxelib
+          haxelib --always --quiet setup ~/haxelib
+          haxelib --global --always --quiet update haxelib
+          echo =========
+          
+          echo === HAXE VERSION ===
+          haxe --version
+          echo =========
+      
+      - name: Install DevKitPro dependencies
+        run: |
+          echo === SYNCING DEVKITPRO REPOS ===
+          dkp-pacman -Sy --noconfirm
+          
+          echo === INSTALLING SWITCH LIBRARIES ===
+          dkp-pacman -S --needed --noconfirm \
+            switch-bzip2 switch-cmake switch-curl switch-flac \
+            switch-freetype switch-glad switch-glm switch-harfbuzz \
+            switch-libdrm_nouveau switch-libjpeg-turbo switch-libmodplug \
+            switch-libogg switch-libopus switch-libpng switch-libvorbis \
+            switch-libvorbisidec switch-libwebp switch-mesa switch-mpg123 \
+            switch-openal-soft switch-opusfile switch-pkg-config switch-sdl2 \
+            switch-sdl2_gfx switch-sdl2_image switch-sdl2_mixer \
+            switch-sdl2_net switch-sdl2_ttf switch-tools switch-zlib \
+            switch-liblua51
+      
+      - name: Install Haxe libraries
+        run: |
+          echo === INSTALLING HAXE LIBRARIES ===
+          haxelib --always --quiet install format
+          haxelib --always --quiet install hxp
+          haxelib --always --quiet git lime https://github.com/Slushi-Github/lime-nx.git
+          haxelib --always --quiet git hxcpp https://github.com/Slushi-Github/hxcpp-nx.git
+          haxelib --always --quiet git hx_libnx https://github.com/Slushi-Github/hx_libnx.git
+          echo =========
+      
+      - name: Setup and build hxcpp
+        run: |
+          echo === SETUP CUSTOM HXCPP ===
+          cd ~/haxelib/hxcpp/git/tools/hxcpp
+          haxe compile.hxml
+          cd -
+          echo =========
+      
+      - name: Build Lime for Switch
+        run: |
+          echo === REBUILDING LIME FOR SWITCH ===
+          haxelib run lime rebuild switch
+          echo =========
+      
+      - name: Skip SScript setup mode
+        run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> ~/settings.cocoa
+      
+      - name: Create Version Tag
+        run: echo "${{github.run_id}}" > VERSION
+      
+      - name: Compile for Switch
+        run: |
+          echo === COMPILING PROJECT FOR SWITCH ===
+          haxelib run lime build Project.xml switch --app-version="4.0.0-${{ github.run_id}}" -D officialBuild
+          echo =========
+      
+      - name: Verify Build Success
+        run: |
+          if ! ls export/release/switch/bin/*.nro 1> /dev/null 2>&1; then
+            echo "::error::.nro file not found."
+            exit 1
+          fi
+      
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: switchBuild
+          path: export/release/switch/bin/*.nro
