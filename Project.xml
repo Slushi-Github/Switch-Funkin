@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	<!-- _________________________ Application Settings _________________________ -->
+
+	<app title="FNF: Switch Funkin'" file="SwitchFunkin" packageName="com.slushi.switchfunkin" package="com.slushi.switchfunkin" main="Main" version="1.0.0" company="Slushi" />
+
+	<!--Switch Export with Unique ApplicationID and Icon 
+	(Slushi Note: Where is this supposed to be used? In normal Lime, APP_ID isn't really used...)-->
+	<set name="APP_ID" value="0x0100f6c013bbc000" />
+
+	<haxedef name="LINC_LUA_RELATIVE_DYNAMIC_LIB"/>
+
+	<app preloader="flixel.system.FlxPreloader" />
+
+	<set name="SWF_VERSION" value="11.8" />
+
+	<!-- ______________________ SWITCH FUNKIN' CUSTOMIZATION ______________________ -->
+	<assets path="assets/SwitchFunkinAssets" rename="assets/SwitchFunkinAssets" include="*"/>
+
+	<!-- Allow touch controls for PlayState -->
+	<define name="TOUCH_CONTROLS_ALLOWED" if="switch"/>
+
+	<!-- Enable videos for Switch build (not working yet) -->
+	<!-- <define name="VIDEOS_ALLOWED" if="switch"/> -->
+
+	<!-- Add modchart features -->
+	<!-- <define name="MODCHART_FEATURE"/> -->
+
+	<!-- Disable Nene Visualizer (Like on Weekend 1) for performance reasons on Switch -->
+	<define name="DISABLE_NENE_VISUALIZER" if="switch"/>
+
+	<section if="MODCHART_FEATURE">
+		<haxedef name="FM_ENGINE" value="PSYCH"/>
+		<haxedef name="FM_ENGINE_VERSION" value="1.0"/>
+
+		<haxelib name="funkin-modchart" />
+		<haxeflag name="--macro" value="modchart.backend.macros.Macro.includeFiles()"/>
+	</section>
+
+	<section if="switch">
+		<!-- Required for Switch for use the correct renderer -->
+		<haxedef name="lime-opengl" if="switch" />
+		<haxedef name="lime-cairo" value="false" if="switch" />
+		<set name="LIME_CAIRO" value="0" if="switch" />
+		<set name="LIME_OPENGL" value="1" if="switch" />
+
+		<haxelib name="hx_libnx"/>
+
+		<!-- CHANGE THIS TO YOUR SWITCH IP -->
+		<config:switch ip="192.168.1.140"/>
+	</section>
+	<!-- _________________________________________________________________________ -->
+
+	<!-- ______________________ PSYCH ENGINE CUSTOMIZATION ______________________ -->
+
+	<define name="MODS_ALLOWED" if="desktop || switch" />
+	<define name="HSCRIPT_ALLOWED" if="desktop || switch" />
+	<define name="LUA_ALLOWED" if="desktop || switch" />
+	<!-- <define name="ACHIEVEMENTS_ALLOWED" /> -->
+	<define name="DISCORD_ALLOWED" unless="switch"/>
+	<!-- <define name="TRANSLATIONS_ALLOWED" /> -->
+	<define name="IRIS_DEBUG"/>
+	
+	<define name="MULTITHREADED_LOADING" /> <!-- UNCOMMENTING THIS LINE WILL ENABLE MULTITHREADED LOADING, WHICH IMPROVES LOADING TIMES, BUT APPARENTLY CAN FREEZE THE GAME ON SONG LOAD IN OLDER PCs? -->
+	<define name="SHOW_LOADING_SCREEN" />
+	
+	<define name="BASE_GAME_FILES"/>
+
+	<!-- ____________________________ Window Settings ___________________________ -->
+
+	<window width="1280" height="720" fps="60" background="#000000" hardware="true" vsync="false" allow-high-dpi="true" />
+
+	<window if="html5" resizable="true" />
+
+	<window if="desktop" orientation="landscape" fullscreen="false" resizable="true" vsync="false"/>
+
+	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0" resizable="false"/>
+
+	<window if="switch" orientation="landscape" fullscreen="true" width="0" height="0" resizable="true" />
+
+	<!-- _____________________________ Path Settings ____________________________ -->
+
+	<set name="BUILD_DIR" value="export/debug" if="debug" />
+	<set name="BUILD_DIR" value="export/release" unless="debug" />
+	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
+
+	<classpath name="source" />
+
+	<!-- __________________________ Game Assets & Etc. __________________________ -->
+	
+	<!-- Turn on Crash Handler -->
+	<define name="CRASH_HANDLER" if="desktop release || switch" />
+
+	<!-- Assets -->
+	<assets path="assets/fonts" />
+	<assets path="assets/shared"        exclude="*.ogg" if="web"/>
+	<assets path="assets/shared"        exclude="*.mp3" unless="web"/>
+	<assets path="assets/embed"         exclude="*.ogg" if="web" embed="true"/>
+	<assets path="assets/embed"         exclude="*.mp3" unless="web" embed="true"/>
+	<assets path="assets/videos"        if="VIDEOS_ALLOWED"/>
+	<assets path="assets/songs"         exclude="*.ogg" if="web"/>
+	<assets path="assets/songs"         exclude="*.mp3" unless="web"/>
+	<assets path="assets/week_assets"   rename="assets" exclude="*.ogg" if="web"/>
+	<assets path="assets/week_assets"   rename="assets" exclude="*.mp3" unless="web"/>
+	<section if="TITLE_SCREEN_EASTER_EGG">
+		<assets path="assets/secrets" rename="assets/shared" exclude="*.ogg" if="web"/>
+		<assets path="assets/secrets" rename="assets/shared" exclude="*.mp3"  unless="web"/>
+	</section>
+
+	<section if="TRANSLATIONS_ALLOWED">
+		<assets path="assets/translations" rename="assets" exclude="*.ogg" if="web"/>
+		<assets path="assets/translations" rename="assets" exclude="*.mp3"  unless="web"/>
+	</section>
+
+	<section if="BASE_GAME_FILES">
+		<assets path="assets/base_game" rename="assets" exclude="*.ogg" if="web"/>
+		<assets path="assets/base_game" rename="assets" exclude="*.mp3"  unless="web"/>
+		<haxelib name="grig.audio" if="BASE_GAME_FILES" unless="DISABLE_NENE_VISUALIZER"/>
+		<haxelib name="funkin.vis" if="BASE_GAME_FILES" unless="DISABLE_NENE_VISUALIZER"/>
+	</section>
+
+	<define name="CHECK_FOR_UPDATES" if="desktop officialBuild || switch"/>
+
+	<section if="MODS_ALLOWED">
+		<assets path='example_mods' rename='mods' embed='false' type='template' unless="mac"/>
+		<assets path='example_mods' rename='mods' embed='false' if="mac"/>
+		<assets path='list.txt' rename='modsList.txt' />
+	</section>
+	<assets path='art/readme.txt' rename='do NOT readme.txt' />
+
+	<!-- OpenAL config -->
+	<section if="desktop">
+		<assets path="alsoft.txt" rename="plugins/alsoft.ini" type="text" if="windows"/>
+		<assets path="alsoft.txt" rename="plugins/alsoft.conf" type="text" unless="windows"/>
+	</section>
+
+	<!-- _______________________________ Libraries ______________________________ -->
+
+	<haxelib name="openfl" version="9.3.3"/>
+	<haxelib name="flixel" version="5.6.1"/>
+	<haxelib name="flixel-addons" version="3.2.2"/>
+	<haxelib name="tjson" version="1.4.0"/>
+
+	<!--Psych stuff needed-->
+	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
+	<haxelib name="hscript-iris" if="HSCRIPT_ALLOWED" version="1.1.3"/>
+	<haxelib name="hxvlc" if="VIDEOS_ALLOWED" unless="switch" version="2.0.1"/>
+	<haxelib name="hxdiscord_rpc" version="1.2.4" if="DISCORD_ALLOWED"/>
+	<haxelib name="flxanimate"/>
+
+	<!-- Disable Discord IO Thread -->
+	<haxedef name="DISCORD_DISABLE_IO_THREAD" if="hxdiscord_rpc" />
+
+	<haxedef name="NO_PRECOMPILED_HEADERS" if="linux || switch" />
+
+	<!-- Enables a terminal log prompt on debug builds -->
+	<haxelib name="hxcpp-debug-server" if="debug" unless="switch"/>
+	<haxedef name="HXC_LIBVLC_LOGGING" if="VIDEOS_ALLOWED debug" unless="switch" />
+	<haxedef name="HXVLC_NO_SHARE_DIRECTORY" if="VIDEOS_ALLOWED" unless="switch" />
+	<define name="x86_BUILD" if="32bits" />
+	
+	<!-- ______________________________ Haxedefines _____________________________ -->
+
+	<!--Disable the Flixel core focus lost screen-->
+	<haxedef name="FLX_NO_FOCUS_LOST_SCREEN" />
+	
+	<!-- Show debug traces for hxCodec -->
+	<haxedef name="HXC_DEBUG_TRACE" if="debug" />
+	
+	<!--Disable the Flixel core debugger. Automatically gets set whenever you compile in release mode!-->
+	<haxedef name="FLX_NO_DEBUG" unless="debug" />
+
+	<!--Enable this for Nape release builds for a serious peformance improvement-->
+	<haxedef name="NAPE_RELEASE_BUILD" unless="debug" />
+	
+	<haxedef name="HXCPP_CHECK_POINTER" if="CRASH_HANDLER" />
+	<haxedef name="HXCPP_STACK_LINE" if="CRASH_HANDLER" />
+	<haxedef name="HXCPP_STACK_TRACE" if="CRASH_HANDLER" />
+	<haxedef name="HXCPP_CATCH_SEGV" if="CRASH_HANDLER" />
+	
+	<!--Disable deprecated warnings-->
+	<haxedef name='no-deprecation-warnings' />
+
+	<!-- Haxe 4.3.0+: Enable pretty syntax errors and stuff. -->
+	<!-- pretty (haxeflixel default), indent, classic (haxe compiler default) -->
+	<haxedef name="message.reporting" value="pretty" />
+
+	<!--Macro fixes-->
+	<haxeflag name="--macro" value="allowPackage('flash')" />
+	<haxeflag name="--macro" value="include('my.pack')" />
+
+	<haxedef name="hscriptPos" if="HSCRIPT_ALLOWED" />
+
+	<!-- Needs to be after defined LUA_ALLOWED and luajit -->
+	<config:switch libs="lua5.1" if="switch LUA_ALLOWED"/>
+
+	<!-- _________________________________ Custom _______________________________ -->
+
+	<assets path='art/icons/iconOG.png' rename='icon.png' if="linux || mac" />
+	
+	<icon path="art/icons/icon16.png" size='16' unless="switch" />
+	<icon path="art/icons/icon32.png" size='32' unless="switch" />
+	<icon path="art/icons/icon64.png" size='64' unless="switch" />
+	<icon path="art/icons/iconOG.png" unless="switch" />
+
+	<icon path="art/switchAssets/SwitchIcon.png" size='256' if="switch"/>
+</project>
