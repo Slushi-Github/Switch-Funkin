@@ -121,7 +121,9 @@ class MainMenuState extends MusicBeatState
 		#end
 
 		#if CHECK_FOR_UPDATES
-		if (showOutdatedWarning && ClientPrefs.data.checkForUpdates && substates.OutdatedSubState.updateVersion != psychEngineVersion && !substates.OutdatedSubState.FAILED_CHECK) {
+		if (showOutdatedWarning
+			&& ClientPrefs.data.checkForUpdates
+			&& substates.OutdatedSubState.updateVersion != Application.current.meta.get('version') && !substates.OutdatedSubState.FAILED_CHECK) {
 			persistentUpdate = false;
 			showOutdatedWarning = false;
 			openSubState(new substates.OutdatedSubState());
@@ -265,6 +267,7 @@ class MainMenuState extends MusicBeatState
 				selectedSomethin = true;
 				FlxG.mouse.visible = false;
 				FlxG.sound.play(Paths.sound('cancelMenu'));
+				SwitchTitleState.backToSwitchTitle = true;
 				MusicBeatState.switchState(new SwitchTitleState());
 			}
 

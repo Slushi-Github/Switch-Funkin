@@ -308,12 +308,13 @@ class ControlsSubState extends MusicBeatSubstate
 					bindingText.alignment = CENTERED;
 					add(bindingText);
 					
-					bindingText2 = new Alphabet(FlxG.width / 2, 340, Language.getPhrase('controls_rebinding2', 'Hold ESC to Cancel\nHold Backspace to Delete'), true);
+					bindingText2 = new Alphabet(FlxG.width / 2, 340, Language.getPhrase('controls_rebinding2', 'Hold ESC to Cancel\nHold Backspace to Delete' #if switch + '\nHold B to Cancel' #end), true);
 					bindingText2.alignment = CENTERED;
 					add(bindingText2);
 
 					binding = true;
 					holdingEsc = 0;
+					// timeForMoving = 0.1;
 					ClientPrefs.toggleVolumeKeys(false);
 					FlxG.sound.play(Paths.sound('scrollMenu'));
 				}
@@ -334,7 +335,7 @@ class ControlsSubState extends MusicBeatSubstate
 		{
 			var altNum:Int = curAlt ? 1 : 0;
 			var curOption:Array<Dynamic> = options[curOptions[curSelected]];
-			if(FlxG.keys.pressed.ESCAPE || FlxG.gamepads.anyPressed(B))
+			if(FlxG.keys.pressed.ESCAPE || FlxG.gamepads.anyPressed(#if switch A #else B #end))
 			{
 				holdingEsc += elapsed;
 				if(holdingEsc > 0.5)
@@ -406,12 +407,12 @@ class ControlsSubState extends MusicBeatSubstate
 						}
 					}
 
-					if (keyPressed != NONE && keyPressed != FlxGamepadInputID.BACK && keyPressed != FlxGamepadInputID.B)
+					if (keyPressed != NONE && keyPressed != FlxGamepadInputID.BACK && keyPressed != #if switch FlxGamepadInputID.A #else FlxGamepadInputID.B #end)
 					{
 						curButtons[altNum] = keyPressed;
 						changed = true;
 					}
-					else if (keyReleased != NONE && (keyReleased == FlxGamepadInputID.BACK || keyReleased == FlxGamepadInputID.B))
+					else if (keyReleased != NONE && (keyReleased == FlxGamepadInputID.BACK || keyReleased == #if switch FlxGamepadInputID.A #else FlxGamepadInputID.B #end))
 					{
 						curButtons[altNum] = keyReleased;
 						changed = true;

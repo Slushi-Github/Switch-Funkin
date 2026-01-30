@@ -129,7 +129,7 @@ class CoolUtil
 	}
 
 	inline public static function openFolder(folder:String, absolute:Bool = false) {
-		#if sys
+		#if (sys && !switch)
 			if(!absolute) folder =  Sys.getCwd() + '$folder';
 
 			folder = folder.replace('/', '\\');
@@ -143,7 +143,7 @@ class CoolUtil
 			Sys.command(command, [folder]);
 			SlDebug.log('$command $folder');
 		#else
-			FlxG.error("Platform is not supported for CoolUtil.openFolder");
+			FlxG.log.error("Platform is not supported for CoolUtil.openFolder");
 		#end
 	}
 

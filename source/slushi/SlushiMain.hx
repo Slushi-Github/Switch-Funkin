@@ -62,11 +62,11 @@ class SlushiMain {
 		return 'assets/SwitchFunkinAssets/$file';
     }
 
-	public static function checkForUpdates():String
+	public static function checkForUpdates():Void
 	{
 		final url = "https://raw.githubusercontent.com/Slushi-Github/Switch-Funkin/main/gitVersion.txt";
 
-		var version:String = Application.current.meta.get('version');
+		final localVersion:String = Application.current.meta.get('version');
 		if (ClientPrefs.data.checkForUpdates)
 		{
 			SlDebug.log('Checking for updates...');
@@ -74,11 +74,11 @@ class SlushiMain {
 			http.onData = function(data:String)
 			{
 				var newVersion:String = data.split('\n')[0].trim();
-				SlDebug.log('GitHub version: $newVersion, your version: $version');
-				if (newVersion != version)
+				SlDebug.log('GitHub version: $newVersion, your version: $localVersion');
+				if (newVersion != localVersion)
 				{
 					SlDebug.log('Versions arent matching!', WARNING);
-					version = newVersion;
+					OutdatedSubState.updateVersion = newVersion;
 					http.onData = null;
 					http.onError = null;
 					http = null;
@@ -91,6 +91,5 @@ class SlushiMain {
 			}
 			http.request();
 		}
-		return version;
 	}
 }

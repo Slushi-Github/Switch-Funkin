@@ -103,10 +103,8 @@ class Main extends Sprite
 
 		#if switch
 		flixel.util.FlxSave._SWITCH_SAVE_PATH = "sdmc:/switch/Switch-Funkin/saves";
-		FlxG.save.bind('funkin', 'SwitchFunkinSave');
-		#else
-		FlxG.save.bind('funkin', CoolUtil.getSavePath());
 		#end
+		FlxG.save.bind('funkin', CoolUtil.getSavePath());
 		Highscore.load();
 
 		#if HSCRIPT_ALLOWED
@@ -202,6 +200,9 @@ class Main extends Sprite
 
 		#if html5
 		FlxG.autoPause = false;
+		#end
+
+		#if (html5 || switch)
 		FlxG.mouse.visible = false;
 		#end
 
@@ -215,11 +216,11 @@ class Main extends Sprite
 
 		// shader coords fix
 		FlxG.signals.gameResized.add(function (w, h) {
-		     if (FlxG.cameras != null) {
-			   for (cam in FlxG.cameras.list) {
+			if (FlxG.cameras != null) {
+			for (cam in FlxG.cameras.list) {
 				if (cam != null && cam.filters != null)
 					resetSpriteCache(cam.flashSprite);
-			   }
+				}
 			}
 
 			if (FlxG.game != null)
@@ -229,7 +230,7 @@ class Main extends Sprite
 
 	static function resetSpriteCache(sprite:Sprite):Void {
 		@:privateAccess {
-		        sprite.__cacheBitmap = null;
+			sprite.__cacheBitmap = null;
 			sprite.__cacheBitmapData = null;
 		}
 	}

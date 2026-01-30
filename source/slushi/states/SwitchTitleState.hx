@@ -65,6 +65,7 @@ class SwitchTitleState extends MusicBeatState
 		left: FlxColor.BLACK,
 		right: FlxColor.BLACK
 	};
+	public static var backToSwitchTitle:Bool = false;
 
 	override public function create():Void
 	{
@@ -95,7 +96,7 @@ class SwitchTitleState extends MusicBeatState
 			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
 		}
 
-		OutdatedSubState.updateVersion = SlushiMain.checkForUpdates();
+		SlushiMain.checkForUpdates();
 
 		FlxG.mouse.visible = false;
 		#if FREEPLAY
@@ -130,6 +131,9 @@ class SwitchTitleState extends MusicBeatState
 		Conductor.bpm = musicBPM;
 
 		#if switch
+		joyconColors.left = SlushiMain.nxController.getJoyConColor(NXJoyCon.LEFT).colorMain;
+		joyconColors.right = SlushiMain.nxController.getJoyConColor(NXJoyCon.RIGHT).colorMain;
+
 		grayGrad = FlxGradient.createGradientFlxSprite(400, FlxG.height, [0x0, FlxColor.WHITE], 1, 0);
 		grayGrad.x = -100;
 		grayGrad.y = 0;
@@ -143,9 +147,6 @@ class SwitchTitleState extends MusicBeatState
 		grayGrad.alpha = 0;
 		grayGrad.visible = false;
 		whiteGrad.visible = false;
-
-		joyconColors.left = SlushiMain.nxController.getJoyConColor(NXJoyCon.LEFT).colorMain;
-		joyconColors.right = SlushiMain.nxController.getJoyConColor(NXJoyCon.RIGHT).colorMain;
 
 		if (joyconColors.left == FlxColor.WHITE)
 		{
@@ -323,15 +324,21 @@ class SwitchTitleState extends MusicBeatState
 		if (FlxG.sound.music != null)
 			Conductor.songPosition = FlxG.sound.music.time;
 
-		SlushiMain.nxController.vibration.update(elapsed);
-
 		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER || controls.ACCEPT;
 
 		#if switch
+		if (backToSwitchTitle) {
+			if (grayGrad != null && whiteGrad != null) {
+				grayGrad.color = joyconColors.left;
+				whiteGrad.color = joyconColors.right;
+			}
+			backToSwitchTitle = false;
+		}
+
 		if (joyconColors.left != SlushiMain.nxController.getJoyConColor(NXJoyCon.LEFT).colorMain) {
+			joyconColors.left = SlushiMain.nxController.getJoyConColor(NXJoyCon.LEFT).colorMain;
 			if (grayTweenColor != null)
 				grayTweenColor.cancel();
-			joyconColors.left = SlushiMain.nxController.getJoyConColor(NXJoyCon.LEFT).colorMain;
 			if (joyconColors.left == FlxColor.WHITE) {
 				joyconColors.left = FlxColor.BLACK;
 				grayGrad.visible = false;
@@ -343,9 +350,9 @@ class SwitchTitleState extends MusicBeatState
 		}
 
 		if (joyconColors.right != SlushiMain.nxController.getJoyConColor(NXJoyCon.RIGHT).colorMain) {
+			joyconColors.right = SlushiMain.nxController.getJoyConColor(NXJoyCon.RIGHT).colorMain;
 			if (whiteTweenColor != null)
 				whiteTweenColor.cancel();
-			joyconColors.right = SlushiMain.nxController.getJoyConColor(NXJoyCon.RIGHT).colorMain;
 			if (joyconColors.right == FlxColor.WHITE) {
 				joyconColors.right = FlxColor.BLACK;
 				whiteGrad.visible = false;
