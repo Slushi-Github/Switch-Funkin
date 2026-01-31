@@ -75,10 +75,10 @@ class SlushiMain {
 			{
 				var newVersion:String = data.split('\n')[0].trim();
 				SlDebug.log('GitHub version: $newVersion, your version: $localVersion');
+				OutdatedSubState.updateVersion = newVersion;
 				if (newVersion != localVersion)
 				{
 					SlDebug.log('Versions arent matching!', WARNING);
-					OutdatedSubState.updateVersion = newVersion;
 					http.onData = null;
 					http.onError = null;
 					http = null;

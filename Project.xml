@@ -2,7 +2,7 @@
 <project>
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="FNF: Switch Funkin'" file="SwitchFunkin" packageName="com.slushi.switchfunkin" package="com.slushi.switchfunkin" main="Main" version="1.0.3" company="Slushi" />
+	<app title="FNF: Switch Funkin'" file="SwitchFunkin" packageName="com.slushi.switchfunkin" package="com.slushi.switchfunkin" main="Main" version="1.0.4" company="Slushi" />
 
 	<!--Switch Export with Unique ApplicationID and Icon 
 	(Slushi Note: Where is this supposed to be used? In normal Lime, APP_ID isn't really used...)-->

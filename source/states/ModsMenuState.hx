@@ -786,10 +786,22 @@ class ModsMenuState extends MusicBeatState
 			fileStr += '$mod|$on';
 		}
 
+		#if switch
+		var path:String = "sdmc:/switch/Switch-Funkin/modsList.txt";
+		#else
 		var path:String = 'modsList.txt';
-		File.saveContent(path, fileStr);
-		Mods.parseList();
-		Mods.loadTopMod();
+		#end
+
+		try
+		{
+			File.saveContent(path, fileStr);
+			Mods.parseList();
+			Mods.loadTopMod();
+		}
+		catch (e:Dynamic)
+		{
+			SlDebug.log('Failed to save modsList.txt: $e', ERROR);
+		}
 	}
 }
 
