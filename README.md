@@ -28,7 +28,10 @@ Don't expect this engine to compile to other platforms. Although I have tried to
 
 Download the latest version:
 - From [GitHub](https://github.com/https://github.com/Slushi-Github/Switch-Funkin/releases/latest).
-- From [GitHub Actions](https://github.com/Slushi-Github/Switch-Funkin/actions).
+- ~~From GitHub Actions~~
+- From Gamebanana:
+	> [![](https://gamebanana.com/tools/embeddables/21807?type=large)](https://gamebanana.com/tools/21807)
+- From Homebrew App Store: Not yet.
 
 Inside the downloaded ZIP, you will find a file that ends with `.nro`. Drag it into the `switch` folder on your console’s SD card. Then simply open the Homebrew Menu from an official game (usually by holding the **R** button while launching a game from the HOME menu), look for **"FNF: Switch Funkin'"**, open it, and enjoy!
 
