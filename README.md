@@ -31,11 +31,15 @@ Download the latest version:
 - ~~From GitHub Actions~~
 - From Gamebanana:
 	> [![](https://gamebanana.com/tools/embeddables/21807?type=large)](https://gamebanana.com/tools/21807)
-- From Homebrew App Store: Not yet.
+- From [Homebrew App Store For Nintendo Switch](https://hb-app.store/switch/FNFSwitchFunkin)
 
+The Homebrew App Store option allows you to download the game directly to your console! It's the easiest way to get the game and future updates. To do this, search for the game in the HBAS client on your Switch and download it.
+
+But if you prefer the other options...
+  
 Inside the downloaded ZIP, you will find a file that ends with `.nro`. Drag it into the `switch` folder on your console’s SD card. Then simply open the Homebrew Menu from an official game (usually by holding the **R** button while launching a game from the HOME menu), look for **"FNF: Switch Funkin'"**, open it, and enjoy!
 
-For now, I do not offer an NSP file to install it directly on the console and skip the Homebrew Menu step. I am also considering uploading it to the [Homebrew App Store for Nintendo Switch](https://hb-app.store/switch) to make installation and updates even easier.
+For now, I do not offer an NSP file to install it directly on the console and skip the Homebrew Menu step. 
 
 ## Mods and others
 
