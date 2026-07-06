@@ -14,7 +14,7 @@ That’s it, there’s not much more to say. Enjoy the real Friday Night Funkin'
 
 Everything in Psych Engine works, with the important exception of videos, because there is currently no way to get [hxvlc](https://github.com/MAJigsaw77/hxvlc) working on the Switch target. Aside from that, HScript and Lua, shaders, and even mod folder support are functional on this platform.
 
-The engine **CANNOT** cache <dt>ALL</dt> assets, so loading screens can be slow, and even loading the game over screen a second time can be slow. This seems to be a limitation of how the game is compiled for this platform. It might have a solution by not depending on OpenFL for that, but it’s not something I want to modify at the moment.
+The engine **CANNOT** cache *ALL* assets, so loading screens can be slow, and even loading the game over screen a second time can be slow. This seems to be a limitation of how the game is compiled for this platform. It might have a solution by not depending on OpenFL for that, but it’s not something I want to modify at the moment.
 
 If you think you can play with a keyboard or mouse.. No. Unfortunately, it seems this is something that HorizonOS (the Nintendo Switch operating system) prevents, or at least does not allow by default.
 
