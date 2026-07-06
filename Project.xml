@@ -2,7 +2,7 @@
 <project>
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="FNF: Switch Funkin'" file="SwitchFunkin" packageName="com.slushi.switchfunkin" package="com.slushi.switchfunkin" main="Main" version="1.0.4" company="Slushi" />
+	<app title="FNF: Switch Funkin'" file="SwitchFunkin" packageName="com.slushi.switchfunkin" package="com.slushi.switchfunkin" main="Main" version="1.1.0" company="Slushi" />
 
 	<!--Switch Export with Unique ApplicationID and Icon 
 	(Slushi Note: Where is this supposed to be used? In normal Lime, APP_ID isn't really used...)-->
@@ -23,19 +23,8 @@
 	<!-- Enable videos for Switch build (not working yet) -->
 	<!-- <define name="VIDEOS_ALLOWED" if="switch"/> -->
 
-	<!-- Add modchart features -->
-	<!-- <define name="MODCHART_FEATURE"/> -->
-
 	<!-- Disable Nene Visualizer (Like on Weekend 1) for performance reasons on Switch -->
 	<define name="DISABLE_NENE_VISUALIZER" if="switch"/>
-
-	<section if="MODCHART_FEATURE">
-		<haxedef name="FM_ENGINE" value="PSYCH"/>
-		<haxedef name="FM_ENGINE_VERSION" value="1.0"/>
-
-		<haxelib name="funkin-modchart" />
-		<haxeflag name="--macro" value="modchart.backend.macros.Macro.includeFiles()"/>
-	</section>
 
 	<section if="switch">
 		<!-- Required for Switch for use the correct renderer -->

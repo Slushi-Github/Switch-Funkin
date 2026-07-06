@@ -1,6 +1,8 @@
 package backend;
 
+#if switch
 import slushi.nx.NXSimpleWeb;
+#end
 import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
 
@@ -120,7 +122,7 @@ class CoolUtil
 		#if linux
 		Sys.command('/usr/bin/xdg-open', [site]);
 		#elseif switch
-		var browser = new NXSimpleWeb(site);
+		final browser = new NXSimpleWeb(site);
 		browser.showWebPage();
 		browser.destroy();
 		#else

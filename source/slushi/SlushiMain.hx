@@ -9,24 +9,23 @@ import substates.OutdatedSubState;
  * Author: Slushi
  */
 class SlushiMain {
-    /**
-     * A extra comment for the version of the engine 
-     */
-    public static final VERSION_EXTRA_TEXT:String = "";
-
 	/**
 	 * Slushi color :3
 	 */
 	public static final slushiColor:FlxColor = FlxColor.fromRGB(143, 217, 209); // 0xff8FD9D1 0xffd6f3de
 
+	#if switch
     /**
      * Controller manager for Nintendo Switch controllers
      */
 	public static var nxController:NXController = null;
+	#end
 
     public static function init() {
+		#if switch
         nxController = new NXController();
-        Application.current.window.onClose.add(function () {
+		#end
+        Application.current.onExit.add((_) -> {
             destroy();
         });
     }

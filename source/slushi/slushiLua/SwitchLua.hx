@@ -6,7 +6,7 @@ class SwitchLua
 {
 	public static function implement(funk:FunkinLua)
 	{
-        #if !switch
+        #if switch
 		final lua = funk.lua;
 		funk.set("CONSOLE_IS_DOCKED", SwitchUtils.IS_DOCKED);
 

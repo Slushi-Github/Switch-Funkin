@@ -1,7 +1,10 @@
 package slushi.nx;
 
-import flixel.FlxBasic;
+#if switch
 import switchLib.applets.Web;
+#end
+
+import flixel.FlxBasic;
 
 /**
  * TODO:
@@ -91,7 +94,7 @@ class NXSimpleWeb {
      */
     public function showWebPage():Void {
         if (failed || !initialized || (failed && !initialized)) return;
-        var result:ResultType = Web.webConfigShow(Pointer.addressOf(this.webConfig), null);
+        final result:ResultType = Web.webConfigShow(Pointer.addressOf(this.webConfig), null);
         if (Result.R_FAILED(result)) {
 			SlDebug.log("Failed to show web page: " + result, ERROR);
             failed = true;

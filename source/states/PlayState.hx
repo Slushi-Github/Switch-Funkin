@@ -6,10 +6,6 @@ import backend.WeekData;
 import backend.Song;
 import backend.Rating;
 
-#if MODCHART_FEATURE
-import modchart.Manager;
-#end
-
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.FlxSubState;
@@ -165,10 +161,6 @@ class PlayState extends MusicBeatState
 
 	public var camFollow:FlxObject;
 	private static var prevCamFollow:FlxObject;
-
-	#if MODCHART_FEATURE
-	public var modchartManager:Manager = null;
-	#end
 
 	public var strumLineNotes:FlxTypedGroup<StrumNote> = new FlxTypedGroup<StrumNote>();
 	public var opponentStrums:FlxTypedGroup<StrumNote> = new FlxTypedGroup<StrumNote>();
@@ -571,7 +563,7 @@ class PlayState extends MusicBeatState
 		if(ClientPrefs.data.downScroll)
 			botplayTxt.y = healthBar.y + 70;
 
-		var sfVer:FlxText = new FlxText(12, FlxG.height - 24, 0, "Switch Funkin' v" + Application.current.meta.get('version') + ' ' + SlushiMain.VERSION_EXTRA_TEXT, 12);
+		var sfVer:FlxText = new FlxText(12, FlxG.height - 24, 0, "Switch Funkin' v" + Application.current.meta.get('version') #if !switch + " (NOT RUNNING ON SWITCH)" #end, 12);
 		sfVer.scrollFactor.set();
 		sfVer.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		sfVer.alpha = 0.65;
@@ -629,11 +621,6 @@ class PlayState extends MusicBeatState
 			hitbox.onButtonDown.add(onHintPress);
 			hitbox.onButtonUp.add(onHintRelease);
 		}
-		#end
-
-		#if MODCHART_FEATURE
-		modchartManager = new Manager();
-		add(modchartManager);
 		#end
 
 		startCallback();
@@ -1740,6 +1727,17 @@ class PlayState extends MusicBeatState
 			botplaySine += 180 * elapsed;
 			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180);
 		}
+
+		#if switch
+		if (SwitchUtils.appState == AppletStateMode.APP_SUSPENDED || SwitchUtils.appState == AppletStateMode.APP_OUT_OF_FOCUS) {
+			if (startedCountdown && canPause) {
+				var ret:Dynamic = callOnScripts('onPause', null, true);
+				if(ret != LuaUtils.Function_Stop) {
+					openPauseMenu();
+				}
+			}
+		}
+		#end
 
 		if (controls.PAUSE && startedCountdown && canPause)
 		{

@@ -95,7 +95,7 @@ class MainMenuState extends MusicBeatState
 			rightItem.x -= rightItem.width;
 		}
 
-		var sfVer:FlxText = new FlxText(12, FlxG.height - 64, 0, "Switch Funkin' v" + Application.current.meta.get('version') + ' ' + SlushiMain.VERSION_EXTRA_TEXT, 12);
+		var sfVer:FlxText = new FlxText(12, FlxG.height - 64, 0, "Switch Funkin' v" + Application.current.meta.get('version') #if !switch + " (NOT RUNNING ON SWITCH)" #end, 12);
 		sfVer.scrollFactor.set();
 		sfVer.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(sfVer);

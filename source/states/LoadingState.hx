@@ -411,8 +411,13 @@ class LoadingState extends MusicBeatState
 	static function _startPool()
 	{
 		#if MULTITHREADED_LOADING
+		#if switch
+		// The switch has 4 threads, so we decrease it by 1 to account for the Main thread
+		var threadCount:Int = Std.int(Math.max(1, 4 - 1));
+		#else
 		// Due to the Main thread and Discord thread, we decrease it by 2.
 		var threadCount:Int = Std.int(Math.max(1, getCPUThreadsCount() - #if DISCORD_ALLOWED 2 #else 1 #end));
+		#end
 		#else
 		var threadCount:Int = 1;
 		#end
@@ -713,10 +718,16 @@ class LoadingState extends MusicBeatState
 		{
 			var path:String = Paths.getPath('characters/$char.json', TEXT);
 			#if MODS_ALLOWED
+			#if switch
+			var fsPath:String = Paths.toFileSystemPath(path);
+			var character:Dynamic = Json.parse(File.getContent(fsPath));
+			#else
 			var character:Dynamic = Json.parse(File.getContent(path));
+			#end
 			#else
 			var character:Dynamic = Json.parse(Assets.getText(path));
 			#end
+
 
 			var isAnimateAtlas:Bool = false;
 			var img:String = character.image;
@@ -770,9 +781,24 @@ class LoadingState extends MusicBeatState
 	{
 		var file:String = Paths.getPath(Language.getFileTranslation(key) + '.${Paths.SOUND_EXT}', SOUND, path, modsAllowed);
 
-		//SlDebug.log('precaching sound: $file');
-		if(!Paths.currentTrackedSounds.exists(file))
+		if (!Paths.currentTrackedSounds.exists(file))
 		{
+			#if switch
+			var fsPath:String = Paths.toFileSystemPath(file);
+			if (FileSystem.exists(fsPath))
+			{
+				var sound:Sound = Sound.fromFile(fsPath);
+				mutex.acquire();
+				Paths.currentTrackedSounds.set(file, sound);
+				mutex.release();
+			}
+			else if (beepOnNull)
+			{
+				SlDebug.log('SOUND NOT FOUND: $key, PATH: $path');
+				FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
+				return FlxAssets.getSound('flixel/sounds/beep');
+			}
+			#else
 			if (#if sys FileSystem.exists(file) || #end OpenFlAssets.exists(file, SOUND))
 			{
 				var sound:Sound = #if sys Sound.fromFile(file) #else OpenFlAssets.getSound(file, false) #end;
@@ -786,6 +812,7 @@ class LoadingState extends MusicBeatState
 				FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
 				return FlxAssets.getSound('flixel/sounds/beep');
 			}
+			#end
 		}
 		mutex.acquire();
 		Paths.localTrackedAssets.push(file);
@@ -797,49 +824,66 @@ class LoadingState extends MusicBeatState
 	// thread safe sound loader
 	static function preloadGraphic(key:String):Null<BitmapData>
 	{
-		try {
+		try
+		{
 			var requestKey:String = 'images/$key';
 			#if TRANSLATIONS_ALLOWED requestKey = Language.getFileTranslation(requestKey); #end
-			if(requestKey.lastIndexOf('.') < 0) requestKey += '.png';
+			if (requestKey.lastIndexOf('.') < 0)
+				requestKey += '.png';
 
-			if (!Paths.currentTrackedAssets.exists(requestKey))
+			if (Paths.currentTrackedAssets.exists(requestKey))
+				return Paths.currentTrackedAssets.get(requestKey).bitmap;
+
+			var file:String = Paths.getPath(requestKey, IMAGE);
+
+			#if switch
+			var fsPath:String = Paths.toFileSystemPath(file);
+			if (FileSystem.exists(fsPath))
 			{
-				var file:String = Paths.getPath(requestKey, IMAGE);
-				if (#if sys FileSystem.exists(file) || #end OpenFlAssets.exists(file, IMAGE))
-				{
-					#if sys
-					var bitmap:BitmapData = BitmapData.fromFile(file);
-					#else
-					var bitmap:BitmapData = OpenFlAssets.getBitmapData(file, false);
-					#end
-
-					mutex.acquire();
-					requestedBitmaps.set(file, bitmap);
-					originalBitmapKeys.set(file, requestKey);
-					mutex.release();
-					return bitmap;
-				}
-				else SlDebug.log('no such image $key exists');
+				var bitmap:BitmapData = BitmapData.fromFile(fsPath);
+				mutex.acquire();
+				requestedBitmaps.set(file, bitmap);
+				originalBitmapKeys.set(file, requestKey);
+				mutex.release();
+				return bitmap;
 			}
+			else
+				SlDebug.log('no such image $key exists');
+			#else
+			if (#if sys FileSystem.exists(file) || #end OpenFlAssets.exists(file, IMAGE))
+			{
+				#if sys
+				var bitmap:BitmapData = BitmapData.fromFile(file);
+				#else
+				var bitmap:BitmapData = OpenFlAssets.getBitmapData(file, false);
+				#end
 
-			return Paths.currentTrackedAssets.get(requestKey).bitmap;
+				mutex.acquire();
+				requestedBitmaps.set(file, bitmap);
+				originalBitmapKeys.set(file, requestKey);
+				mutex.release();
+				return bitmap;
+			}
+			else
+				SlDebug.log('no such image $key exists');
+			#end
 		}
-		catch(e:haxe.Exception)
+		catch (e:haxe.Exception)
 		{
-			SlDebug.log('ERROR! fail on preloading image $key');
+			SlDebug.log('ERROR! fail on preloading image $key: ${e.details()}');
 		}
 
 		return null;
 	}
 	
-	#if cpp
+	#if (cpp && !switch)
 	@:functionCode('
 		return std::thread::hardware_concurrency();
-    	')
+    ')
 	@:noCompletion
-    	public static function getCPUThreadsCount():Int
-    	{
-        	return -1;
-    	}
-    	#end
+	public static function getCPUThreadsCount():Int
+	{
+		return -1;
+	}
+	#end
 }

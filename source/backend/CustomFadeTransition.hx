@@ -1,91 +1,71 @@
 package backend;
 
-import flixel.FlxCamera;
-import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.FlxSubState;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.util.FlxColor;
-
 class CustomFadeTransition extends MusicBeatSubstate
 {
 	public static var finishCallback:Void->Void;
 
-	private var tween:FlxTween = null;
-
-	var fadeInState:Bool = true;
-
-	public static var placedZoom:Float;
-	public static var divideZoom:Bool = true; // Divide = true, multiple = false
+	var isTransIn:Bool = false;
+	var transBlack:FlxSprite;
 
 	var duration:Float;
 
-	public function new(duration:Float, fadeInState:Bool, zoom:Float)
+	public function new(duration:Float, isTransIn:Bool)
 	{
 		this.duration = duration;
-		this.fadeInState = fadeInState;
-		if (placedZoom > 0)
-			placedZoom = zoom;
+		this.isTransIn = isTransIn;
 		super();
 	}
 
-	var cameraTrans:FlxCamera = null;
-	var transBlack:FlxSprite = null;
-
-	override public function create()
+	override function create()
 	{
-		cameraTrans = new FlxCamera();
-		cameraTrans.bgColor.alpha = 0;
+		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+		var width:Int = Std.int(FlxG.width / Math.max(camera.zoom, 0.001));
+		var height:Int = Std.int(FlxG.height / Math.max(camera.zoom, 0.001));
 
-		FlxG.cameras.add(cameraTrans, false);
-
-		var width:Int = divideZoom ? Std.int(FlxG.width / Math.max(camera.zoom, 0.001)) : Std.int(FlxG.width * Math.max(camera.zoom, 0.001));
-		var height:Int = divideZoom ? Std.int(FlxG.height / Math.max(camera.zoom, 0.001)) : Std.int(FlxG.width * Math.max(camera.zoom, 0.001));
-
-		transBlack = new FlxSprite().makeGraphic(width + 400, height + 400, FlxColor.BLACK);
+		transBlack = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		transBlack.scale.set(width, height);
+		transBlack.updateHitbox();
 		transBlack.scrollFactor.set();
-		transBlack.alpha = fadeInState ? 1 : 0;
-		transBlack.visible = true;
+		transBlack.screenCenter();
+		// Si entra, empieza opaco y baja a 0. Si sale, empieza en 0 y sube a 1
+		transBlack.alpha = isTransIn ? 1.0 : 0.0;
 		add(transBlack);
 
-		if (fadeInState)
-		{
-			FlxTween.tween(transBlack, {alpha: 0}, duration, {ease: FlxEase.quadInOut});
-			new FlxTimer().start(duration, function(twn:FlxTimer)
-			{
-				close();
-			});
-		}
-		else
-		{
-			tween = FlxTween.tween(transBlack, {alpha: 1}, duration, {ease: FlxEase.quadInOut});
-			new FlxTimer().start(duration, function(twn:FlxTimer)
-			{
-				if (finishCallback != null)
-				{
-					finishCallback();
-				}
-			});
-		}
-
 		super.create();
-
-		cameras = [cameraTrans];
 	}
 
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+
+		final speed:Float = duration > 0 ? elapsed / duration : 1.0;
+
+		if (isTransIn)
+			transBlack.alpha -= speed; // Negro -> Transparente
+		else
+			transBlack.alpha += speed; // Transparente -> Negro
+
+		if (isTransIn && transBlack.alpha <= 0.0)
+		{
+			transBlack.alpha = 0.0;
+			close();
+		}
+		else if (!isTransIn && transBlack.alpha >= 1.0)
+		{
+			transBlack.alpha = 1.0;
+			close();
+		}
 	}
 
-	override function destroy()
+	// Don't delete this
+	override function close():Void
 	{
-		if (tween != null)
+		super.close();
+
+		if (finishCallback != null)
 		{
 			finishCallback();
-			tween.cancel();
+			finishCallback = null;
 		}
-		super.destroy();
 	}
 }

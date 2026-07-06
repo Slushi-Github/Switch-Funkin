@@ -14,11 +14,11 @@ That’s it, there’s not much more to say. Enjoy the real Friday Night Funkin'
 
 Everything in Psych Engine works, with the important exception of videos, because there is currently no way to get [hxvlc](https://github.com/MAJigsaw77/hxvlc) working on the Switch target. Aside from that, HScript and Lua, shaders, and even mod folder support are functional on this platform.
 
-The engine **CANNOT** cache assets, so loading screens can be slow, and even loading the game over screen a second time can be slow. This seems to be a limitation of how the game is compiled for this platform. It might have a solution by not depending on OpenFL for that, but it’s not something I want to modify at the moment.
+The engine **CANNOT** cache <dt>ALL</dt> assets, so loading screens can be slow, and even loading the game over screen a second time can be slow. This seems to be a limitation of how the game is compiled for this platform. It might have a solution by not depending on OpenFL for that, but it’s not something I want to modify at the moment.
 
-If you think you can play with a keyboard or mouse — no. Unfortunately, it seems this is something that HorizonOS (the Nintendo Switch operating system) prevents, or at least does not allow by default.
+If you think you can play with a keyboard or mouse.. No. Unfortunately, it seems this is something that HorizonOS (the Nintendo Switch operating system) prevents, or at least does not allow by default.
 
-Also keep something in mind: The Nintendo Switch is hardware from around 2016, and Psych Engine is apparently not the best FNF engine for this console. This may require optimizing the engine or the mod, but in the end we are dealing with a mid-2016 device with 4 GB of RAM — you can’t expect miracles on this platform, okay? From what I saw, [V-Slice](https://github.com/FunkinCrew/Funkin) should perform better, but it has dependencies that make it impossible to compile for Nintendo Switch. This is the reason I chose Psych Engine, besides it being the FNF engine I know the most and that I like.
+Also keep something in mind: The Nintendo Switch is hardware from around 2016, and Psych Engine is apparently not the best FNF engine for this console. This may require optimizing the engine or the mod, but in the end we are dealing with a mid-2016 device with 4 GB of RAM, so you can’t expect miracles on this platform, okay? From what I saw, [V-Slice](https://github.com/FunkinCrew/Funkin) should perform better than Psych, but it has a complexity that make it impossible for me mantain it for Nintendo Switch, [there is a attempt to do it, but it is not finished](https://github.com/FunkinNXTeam/Funkin). This is the reason I chose Psych Engine, besides it being the FNF engine I know the most and that I like.
 
 Even though it may sound obvious, mods that use special mechanics requiring extra keys will need modifications to support controllers.
 
@@ -36,14 +36,16 @@ Download the latest version:
 The Homebrew App Store option allows you to download the game directly to your console! It's the easiest way to get the game and future updates. To do this, search for the game in the HBAS client on your Switch and download it.
 
 But if you prefer the other options...
-  
-Inside the downloaded ZIP, you will find a file that ends with `.nro`. Drag it into the `switch` folder on your console’s SD card. Then simply open the Homebrew Menu from an official game (usually by holding the **R** button while launching a game from the HOME menu), look for **"FNF: Switch Funkin'"**, open it, and enjoy!
 
-For now, I do not offer an NSP file to install it directly on the console and skip the Homebrew Menu step. 
+Inside the downloaded ZIP, you will find a file that ends with `.nro`. Drag it into the `switch` folder on your console’s SD card. 
+
+Simply open the Homebrew Menu from an official game (usually by holding the **R** button while launching a game from the HOME menu), look for **"FNF: Switch Funkin'"**, open it, and enjoy!
+
+For now, I do not offer an NSP file to install it directly on the console and skip the Homebrew Menu step.
 
 ## Mods and others
 
-Installing mods in Switch Funkin' is easy. Once you open the game at least once, on your SD card, inside the `switch` folder, you will see a new folder called `Switch-Funkin`. Inside it, you will find the `mods` folder, which works exactly like normal Psych Engine. You will also find folders with crash logs or shader error logs, as well as the `saves` folder, which stores the game’s save data — the same standard [HaxeFlixel save files](https://haxeflixel.com/documentation/flxsave/).
+Installing mods in Switch Funkin' is easy. Once you open the game at least once, on your SD card, inside the `switch` folder, you will see a new folder called `Switch-Funkin`. Inside it, you will find the `mods` folder, which works exactly like normal Psych Engine. You will also find folders with crash logs or shader error logs, as well as the `saves` folder, which stores the game’s save data, the same standard [HaxeFlixel save files](https://haxeflixel.com/documentation/flxsave/).
 
 ## Compiling the engine
 
@@ -86,6 +88,10 @@ If you want to contribute to this project, you can do it by creating a pull requ
 This engine uses code from [Vupx Engine (My framework engine for the Nintendo Switch)](https://slushi-github.github.io/Vupx-Engine) and also from [Slushi Engine](https://github.com/Slushi-Github/Slushi-Engine) (only the Slushi Freeplay).
 
 ... [This](https://www.youtube.com/watch?v=8RBJdMUOzrE) is no longer a meme XDD.
+
+- FNF V-Slice for the console [here](https://github.com/FunkinNXTeam/Funkin) (Is imcomplete and broken...).
+
+- Old FNF vanilla for the console [here](https://github.com/FunkinNXTeam/FunkinLegacy).
 
 ## Screenshots
 
