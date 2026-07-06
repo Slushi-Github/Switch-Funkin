@@ -89,9 +89,9 @@ This engine uses code from [Vupx Engine (My framework engine for the Nintendo Sw
 
 ... [This](https://www.youtube.com/watch?v=8RBJdMUOzrE) is no longer a meme XDD.
 
-- FNF V-Slice for the console [here](https://github.com/FunkinNXTeam/Funkin) (Is imcomplete and broken...).
+FNF V-Slice for the console [here](https://github.com/FunkinNXTeam/Funkin) (Is imcomplete, old and broken...).
 
-- Old FNF vanilla for the console [here](https://github.com/FunkinNXTeam/FunkinLegacy).
+Old FNF vanilla for the console [here](https://github.com/FunkinNXTeam/FunkinLegacy).
 
 ## Screenshots
 
