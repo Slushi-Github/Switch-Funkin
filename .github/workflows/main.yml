@@ -17,12 +17,16 @@ jobs:
     steps:
       - name: Checkout Project Repository
         uses: actions/checkout@v4
-      
+
+      - name: Install Linux dependencies
+        run: |
+          apt-get update
+          apt-get install -y libgl1-mesa-dev libglu1-mesa-dev g++-multilib gcc-multilib libasound2-dev libx11-dev libxext-dev libxi-dev libxrandr-dev libxinerama-dev libpulse-dev libmbedtls-dev libpng-dev libturbojpeg-dev libuv1-dev libvorbis-dev libvulkan-dev
+          
       - name: Install Haxe 4.3.4
         run: |
           apt-get update
           apt-get install -y wget git neko libgc-dev
-          apt-get install -y libasound2-dev
           
           echo === DOWNLOADING HAXE FROM GITHUB ===
           wget https://github.com/HaxeFoundation/haxe/releases/download/4.3.4/haxe-4.3.4-linux64.tar.gz
@@ -44,7 +48,7 @@ jobs:
       - name: Install DevKitPro dependencies
         run: |
           echo === SYNCING DEVKITPRO REPOS ===
-          dkp-pacman -Sy --noconfirm
+          dkp-pacman -Sy --noconfirm || echo "::warning:: The devkitPro repositories could not be synchronized (possible rate limit). Attempting to install using the existing cache..."
           
           echo === INSTALLING SWITCH LIBRARIES ===
           dkp-pacman -S --needed --noconfirm \
