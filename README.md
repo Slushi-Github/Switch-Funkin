@@ -27,7 +27,7 @@ Don't expect this engine to compile to other platforms. Although I have tried to
 ## Installation
 
 Download the latest version:
-- From [GitHub](https://github.com/https://github.com/Slushi-Github/Switch-Funkin/releases/latest).
+- From [GitHub](https://github.com/Slushi-Github/Switch-Funkin/releases/latest).
 - ~~From GitHub Actions~~
 - From Gamebanana:
 	> [![](https://gamebanana.com/tools/embeddables/21807?type=large)](https://gamebanana.com/tools/21807)
