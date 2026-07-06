@@ -74,7 +74,6 @@ jobs:
           echo =========
           haxelib --always --quiet git lime https://github.com/Slushi-Github/lime-nx.git
           haxelib --always --quiet git hx_libnx https://github.com/Slushi-Github/hx_libnx.git
-          haxelib run lime --version
           haxelib list
           echo =========
       
