@@ -34,6 +34,7 @@ import openfl.filters.ShaderFilter;
 #end
 
 import shaders.ErrorHandledShader;
+import dgm.util.DebugLog;
 
 import objects.VideoSprite;
 import objects.Note.EventNote;
@@ -868,15 +869,36 @@ class PlayState extends MusicBeatState
 			{
 				function onVideoEnd()
 				{
+					DebugLog.log('onVideoEnd: entered');
+					var vc:VideoSprite = videoCutscene;
+					if (vc != null)
+					{
+						vc.visible = false;
+						vc.active = false;
+						new FlxTimer().start(0.5, function(_)
+						{
+							if (vc != null)
+							{
+								vc.kill();
+								if (FlxG.state.members.contains(vc))
+									FlxG.state.remove(vc);
+								vc.destroy();
+								DebugLog.log('onVideoEnd: cutscene destroyed');
+							}
+						});
+					}
+					DebugLog.log('onVideoEnd: hidden, before camera');
 					if (!isDead && generatedMusic && PlayState.SONG.notes[Std.int(curStep / 16)] != null && !endingSong && !isCameraOnForcedPos)
 					{
 						moveCameraSection();
 						FlxG.camera.snapToTarget();
 					}
+					DebugLog.log('onVideoEnd: camera ok');
 					videoCutscene = null;
 					canPause = true;
 					inCutscene = false;
 					startAndEnd();
+					DebugLog.log('onVideoEnd: done');
 				}
 				videoCutscene.finishCallback = onVideoEnd;
 				videoCutscene.onSkip = onVideoEnd;

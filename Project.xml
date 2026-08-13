@@ -20,8 +20,14 @@
 	<!-- Allow touch controls for PlayState -->
 	<define name="TOUCH_CONTROLS_ALLOWED" if="switch"/>
 
-	<!-- Enable videos for Switch build (not working yet) -->
-	<!-- <define name="VIDEOS_ALLOWED" if="switch"/> -->
+	<!-- Enable videos for Switch build.
+	     Uses dgm.video.SwitchVideo (mpv-based, hxvlc-compatible) when DGM_MPV is set,
+	     otherwise falls back to the OpenFL NetStream implementation. -->
+	<define name="VIDEOS_ALLOWED" if="switch"/>
+
+	<!-- Uncomment once mpv is installed for devkitA64 (${DEVKITPRO}/portlibs/switch):
+	     enables the dgm/video SwitchWave-style mpv wrapper. -->
+	<define name="DGM_MPV" if="switch"/>
 
 	<!-- Disable Nene Visualizer (Like on Weekend 1) for performance reasons on Switch -->
 	<define name="DISABLE_NENE_VISUALIZER" if="switch"/>
@@ -36,7 +42,7 @@
 		<haxelib name="hx_libnx"/>
 
 		<!-- CHANGE THIS TO YOUR SWITCH IP -->
-		<config:switch ip="192.168.1.140"/>
+		<config:switch ip="192.168.100.68"/>
 	</section>
 	<!-- _________________________________________________________________________ -->
 
@@ -182,6 +188,7 @@
 
 	<!-- Needs to be after defined LUA_ALLOWED and luajit -->
 	<config:switch libs="lua5.1" if="switch LUA_ALLOWED"/>
+	<config:switch libs="lua5.1,mpv,ass,avfilter,avcodec,avformat,avutil,swresample,swscale,postproc,placebo,archive,dav1d,fribidi,png16,lzma,lz4,zstd,expat,GLESv2" if="switch DGM_MPV"/>
 
 	<!-- _________________________________ Custom _______________________________ -->
 

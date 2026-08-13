@@ -8,6 +8,8 @@ import flixel.util.FlxColor;
 import flixel.math.FlxMath;
 #if hxvlc
 import hxvlc.flixel.FlxVideoSprite;
+#elseif (switch && DGM_MPV)
+import dgm.video.SwitchVideo;
 #else
 import slushi.fixes.OpenFLVideoSprite;
 #end
@@ -24,6 +26,8 @@ class VideoSprite extends FlxSpriteGroup
 
 	#if hxvlc
 	public var videoSprite:FlxVideoSprite;
+	#elseif (switch && DGM_MPV)
+	public var videoSprite:SwitchVideo;
 	#else
 	public var videoSprite:OpenFLVideoSprite;
 	#end
@@ -57,6 +61,8 @@ class VideoSprite extends FlxSpriteGroup
 		// Initialize sprites
 		#if hxvlc
 		videoSprite = new FlxVideoSprite();
+		#elseif (switch && DGM_MPV)
+		videoSprite = new SwitchVideo();
 		#else
 		videoSprite = new OpenFLVideoSprite();
 		#end
@@ -87,6 +93,9 @@ class VideoSprite extends FlxSpriteGroup
 			videoSprite.setGraphicSize(Std.int(videoSprite.width * scale), Std.int(videoSprite.height * scale));
 			videoSprite.updateHitbox();
 			videoSprite.screenCenter();
+			#if (switch && DGM_MPV)
+			dgm.util.DebugLog.log('VideoSprite onFormatSetup: video=${videoSprite.width} x ${videoSprite.height}, scale=$scale, pos=${videoSprite.x}, ${videoSprite.y}');
+			#end
 		};
 		#end
 
@@ -95,11 +104,15 @@ class VideoSprite extends FlxSpriteGroup
 	}
 
 	var alreadyDestroyed:Bool = false;
+	var _pendingDestroy:Bool = false;
 
 	override function destroy()
 	{
 		if (alreadyDestroyed)
 			return;
+
+		visible = false;
+		active = false;
 
 		SlDebug.log('Video destroyed');
 		if (cover != null)
@@ -126,17 +139,49 @@ class VideoSprite extends FlxSpriteGroup
 
 	function finishVideo()
 	{
+		#if (switch && DGM_MPV)
+		dgm.util.DebugLog.log('finishVideo: entered alreadyDestroyed=$alreadyDestroyed');
+		#end
 		if (!alreadyDestroyed)
 		{
+			// stop rendering immediately - the deferred destroy below may
+			// be delayed by a frame or more, and the last video frame
+			// would otherwise stay stuck on screen over the gameplay.
+			visible = false;
+			active = false;
+			kill();
+			if (videoSprite != null)
+			{
+				videoSprite.visible = false;
+				videoSprite.active = false;
+				videoSprite.kill();
+			}
+
+			#if (switch && DGM_MPV)
+			dgm.util.DebugLog.log('finishVideo: hidden+killed, callback=${finishCallback != null}');
+			#end
+
 			if (finishCallback != null)
 				finishCallback();
 
-			destroy();
+			// never destroy synchronously while flixel's group update loop
+			// is iterating us - it nulls the members array mid-iteration.
+			_pendingDestroy = true;
 		}
 	}
 
 	override function update(elapsed:Float)
 	{
+		if (alreadyDestroyed)
+			return;
+
+		if (_pendingDestroy)
+		{
+			_pendingDestroy = false;
+			destroy();
+			return;
+		}
+
 		if (canSkip)
 		{
 			if (Controls.instance.pressed('accept'))
