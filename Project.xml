@@ -20,17 +20,8 @@
 	<!-- Allow touch controls for PlayState -->
 	<define name="TOUCH_CONTROLS_ALLOWED" if="switch"/>
 
-	<!-- Enable videos for Switch build.
-	     Uses dgm.video.SwitchVideo (mpv-based, hxvlc-compatible) when DGM_MPV is set,
-	     otherwise falls back to the OpenFL NetStream implementation. -->
+	<!-- Enable videos for Switch build -->
 	<define name="VIDEOS_ALLOWED" if="switch"/>
-
-	<!-- Uncomment once mpv is installed for devkitA64 (${DEVKITPRO}/portlibs/switch):
-	     enables the dgm/video SwitchWave-style mpv wrapper. -->
-	<define name="DGM_MPV" if="switch"/>
-
-	<!-- Disable Nene Visualizer (Like on Weekend 1) for performance reasons on Switch -->
-	<define name="DISABLE_NENE_VISUALIZER" if="switch"/>
 
 	<section if="switch">
 		<!-- Required for Switch for use the correct renderer -->
@@ -110,8 +101,8 @@
 	<section if="BASE_GAME_FILES">
 		<assets path="assets/base_game" rename="assets" exclude="*.ogg" if="web"/>
 		<assets path="assets/base_game" rename="assets" exclude="*.mp3"  unless="web"/>
-		<haxelib name="grig.audio" if="BASE_GAME_FILES" unless="DISABLE_NENE_VISUALIZER"/>
-		<haxelib name="funkin.vis" if="BASE_GAME_FILES" unless="DISABLE_NENE_VISUALIZER"/>
+		<haxelib name="grig.audio" if="BASE_GAME_FILES"/>
+		<haxelib name="funkin.vis" if="BASE_GAME_FILES"/>
 	</section>
 
 	<define name="CHECK_FOR_UPDATES" if="desktop officialBuild || switch"/>
@@ -188,7 +179,6 @@
 
 	<!-- Needs to be after defined LUA_ALLOWED and luajit -->
 	<config:switch libs="lua5.1" if="switch LUA_ALLOWED"/>
-	<config:switch libs="lua5.1,mpv,ass,avfilter,avcodec,avformat,avutil,swresample,swscale,postproc,placebo,archive,dav1d,fribidi,png16,lzma,lz4,zstd,expat,GLESv2" if="switch DGM_MPV"/>
 
 	<!-- _________________________________ Custom _______________________________ -->
 

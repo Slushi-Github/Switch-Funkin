@@ -25,3 +25,10 @@ vs_Community.exe
 art/build_html.bat
 art/build_html-debug.bat
 thing.sh
+Project.xml
+native/dgm_mpv_native.cpp
+source/Main.hx
+source/dgm/video/SwitchVideo.hx
+source/dgm/video/Handle.hx
+source/dgm/mpv/Mpv.hx
+source/objects/VideoSprite.hx

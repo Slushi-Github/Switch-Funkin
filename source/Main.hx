@@ -94,8 +94,6 @@ class Main extends Sprite
 
 		#if (VIDEOS_ALLOWED && !switch)
 		hxvlc.util.Handle.init(#if (hxvlc >= "1.8.0")  ['--no-lua'] #end);
-		#elseif (VIDEOS_ALLOWED && DGM_MPV)
-		dgm.video.Handle.init();
 		#end
 
 		#if LUA_ALLOWED

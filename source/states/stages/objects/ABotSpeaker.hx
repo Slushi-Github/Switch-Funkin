@@ -72,6 +72,7 @@ class ABotSpeaker extends FlxSpriteGroup
 		eyes.anim.addBySymbolIndices('lookright', 'a bot eyes lookin', [18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35], 24, false);
 		eyes.anim.play('lookright', true);
 		eyes.anim.curFrame = eyes.anim.length - 1;
+		eyes.antialiasing = false;
 		add(eyes);
 
 		speaker = new FlxAnimate(-65, -10);
@@ -79,16 +80,42 @@ class ABotSpeaker extends FlxSpriteGroup
 		speaker.anim.addBySymbol('anim', 'Abot System', 24, false);
 		speaker.anim.play('anim', true);
 		speaker.anim.curFrame = speaker.anim.length - 1;
-		speaker.antialiasing = antialias;
+		speaker.antialiasing = false;
 		add(speaker);
+
+		#if switch
+		eyes.active = false;
+		speaker.active = false;
+		#end
 	}
 
 	#if funkin.vis
 	var levels:Array<Bar>;
 	var levelMax:Int = 0;
+	var _vizTimer:Float = 0;
+	#if switch
+	final VIZ_UPDATE_RATE:Float = 0.05;
+	var _superTimer:Float = 0;
+	#end
+	#end
 	override function update(elapsed:Float):Void
 	{
+		#if (switch && funkin.vis)
+		_vizTimer += elapsed;
+		_superTimer += elapsed;
+		if (_vizTimer < VIZ_UPDATE_RATE)
+		{
+			if (_superTimer < 0.05) return;
+			_superTimer = 0;
+			super.update(elapsed);
+			return;
+		}
+		_vizTimer = 0;
+		_superTimer = 0;
+		#end
+
 		super.update(elapsed);
+		#if funkin.vis
 		if(analyzer == null) return;
 
 		levels = analyzer.getLevels(levels);
@@ -97,23 +124,25 @@ class ABotSpeaker extends FlxSpriteGroup
 		for (i in 0...Std.int(Math.min(vizSprites.length, levels.length)))
 		{
 			var animFrame:Int = Math.round(levels[i].value * 5);
-			animFrame = Std.int(Math.abs(FlxMath.bound(animFrame, 0, 5) - 5)); // shitty dumbass flip, cuz dave got da shit backwards lol!
-		
+			animFrame = Std.int(Math.abs(FlxMath.bound(animFrame, 0, 5) - 5));
+
 			vizSprites[i].animation.curAnim.curFrame = animFrame;
 			levelMax = Std.int(Math.max(levelMax, 5 - animFrame));
 		}
 
 		if(levelMax >= 4)
 		{
-			//SlDebug.log(levelMax);
 			if(oldLevelMax <= levelMax && (levelMax >= 5 || speaker.anim.curFrame >= 3))
 				beatHit();
 		}
+		#end
 	}
-	#end
 
 	public function beatHit()
 	{
+		#if switch
+		speaker.active = true;
+		#end
 		speaker.anim.play('anim', true);
 	}
 
@@ -122,10 +151,8 @@ class ABotSpeaker extends FlxSpriteGroup
 	{
 		@:privateAccess
 		analyzer = new SpectralAnalyzer(snd._channel.__audioSource, 7, 0.1, 40);
-	
+
 		#if desktop
-		// On desktop it uses FFT stuff that isn't as optimized as the direct browser stuff we use on HTML5
-		// So we want to manually change it!
 		analyzer.fftN = 256;
 		#end
 	}
@@ -134,12 +161,24 @@ class ABotSpeaker extends FlxSpriteGroup
 	var lookingAtRight:Bool = true;
 	public function lookLeft()
 	{
-		if(lookingAtRight) eyes.anim.play('lookleft', true);
+		if(lookingAtRight)
+		{
+			#if switch
+			eyes.active = true;
+			#end
+			eyes.anim.play('lookleft', true);
+		}
 		lookingAtRight = false;
 	}
 	public function lookRight()
 	{
-		if(!lookingAtRight) eyes.anim.play('lookright', true);
+		if(!lookingAtRight)
+		{
+			#if switch
+			eyes.active = true;
+			#end
+			eyes.anim.play('lookright', true);
+		}
 		lookingAtRight = true;
 	}
 }

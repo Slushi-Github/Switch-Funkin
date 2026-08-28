@@ -78,10 +78,8 @@ class PhillyBlazin extends BaseStage
 		abot = new ABotSpeaker(gfGroup.x, gfGroup.y + 550);
 		add(abot);
 		
-		// #if !switch // The Switch has performance issues with this shader
 		if(ClientPrefs.data.shaders)
 			setupRainShader();
-		// #end
 
 		var _song = PlayState.SONG;
 		if(_song.gameOverSound == null || _song.gameOverSound.trim().length < 1) GameOverSubstate.deathSoundName = 'fnf_loss_sfx-pico-gutpunch';

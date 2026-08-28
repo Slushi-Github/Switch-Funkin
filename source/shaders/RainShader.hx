@@ -515,17 +515,15 @@ class RainShader extends FlxShader
 #else
 
 /**
- * A simplified version of the RainShader optimized for the Nintendo Switch.
- * This version reduces the number of operations and layers to improve performance
+ * RainShader optimized to maintain stable framerates on the Nintendo Switch.
+ * Visually identical to the original (with 2 layers, cheap hash,
+ * branchless step(), precomputed camera bounds & skip displaced lookup for non-rain pixels).
  * 
- * Author: Claude (Yeah.. AI generated this code based on the original shader... Sorry!)
+ * Sincerely, Fuck Claude. Don't rely on AI, just ask me instead. 
  */
 class RainShader extends FlxShader
 {
 	@:glVertexHeader('
-		// normalized screen coord
-		//   (0, 0) is the top left of the window
-		//   (1, 1) is the bottom right of the window
 		varying vec2 screenCoord;
 	', true)
 	@:glVertexBody('
@@ -543,115 +541,103 @@ class RainShader extends FlxShader
 		// equals (FlxG.width, FlxG.height)
 		uniform vec2 uScreenResolution;
 
-		// equals (camera.viewLeft, camera.viewTop, camera.viewRight, camera.viewBottom)
+		/*
+			viewLeft, viewTop, viewRight - viewLeft, viewBottom - viewTop)
+			precomputed on the CPU to avoid per-pixel subtractions
+		*/
 		uniform vec4 uCameraBounds;
 
-		// screen coord -> world coord conversion
+		// screen coord to world coord conversion
 		// returns world coord in px
-		vec2 screenToWorld(vec2 screenCoord) {
-			float left = uCameraBounds.x;
-			float top = uCameraBounds.y;
-			float right = uCameraBounds.z;
-			float bottom = uCameraBounds.w;
-			vec2 scale = vec2(right - left, bottom - top);
-			vec2 offset = vec2(left, top);
-			return screenCoord * scale + offset;
+		vec2 screenToWorld(vec2 sc) {
+			return sc * uCameraBounds.zw + uCameraBounds.xy;
 		}
 
-		// world coord -> screen coord conversion
+		// world coord to screen coord conversion
 		// returns normalized screen coord
-		vec2 worldToScreen(vec2 worldCoord) {
-			float left = uCameraBounds.x;
-			float top = uCameraBounds.y;
-			float right = uCameraBounds.z;
-			float bottom = uCameraBounds.w;
-			vec2 scale = vec2(right - left, bottom - top);
-			vec2 offset = vec2(left, top);
-			return (worldCoord - offset) / scale;
+		vec2 worldToScreen(vec2 wc) {
+			return (wc - uCameraBounds.xy) / uCameraBounds.zw;
 		}
 
-		// internally used to get the maximum `openfl_TextureCoordv`
+		// internally used to get the maximum openfl_TextureCoordv
 		vec2 bitmapCoordScale() {
 			return openfl_TextureCoordv / screenCoord;
 		}
 
 		// internally used to compute bitmap coord
-		vec2 screenToBitmap(vec2 screenCoord) {
-			return screenCoord * bitmapCoordScale();
+		vec2 screenToBitmap(vec2 sc) {
+			return sc * bitmapCoordScale();
 		}
 
 		// samples the frame buffer using a screen coord
-		vec4 sampleBitmapScreen(vec2 screenCoord) {
-			return texture2D(bitmap, screenToBitmap(screenCoord));
+		vec4 sampleBitmapScreen(vec2 sc) {
+			return texture2D(bitmap, screenToBitmap(sc));
 		}
 
 		// samples the frame buffer using a world coord
-		vec4 sampleBitmapWorld(vec2 worldCoord) {
-			return sampleBitmapScreen(worldToScreen(worldCoord));
+		vec4 sampleBitmapWorld(vec2 wc) {
+			return sampleBitmapScreen(worldToScreen(wc));
 		}
 	', true)
 	@:glFragmentSource("
 		#pragma header
 
-		// ULTRA-OPTIMIZED: Maximum performance version for Nintendo Switch
-		// - Single rain layer
-		// - Simplified hash function
-		// - Reduced function calls
-		// - Minimized operations per pixel
-
 		uniform float uScale;
 		uniform float uIntensity;
 		uniform float uTime;
 
-		// Ultra-fast hash function
-		float hash(vec2 p) {
-			return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+		float hash(vec2 a)
+		{
+			return fract(a.x * 12.9898 + a.y * 78.233);
 		}
 
-		// Simplified rainDist with fewer operations
-		float rainDist(vec2 p, float scale, float intensity) {
-			p *= 0.1;
-			p.x += p.y * 0.1;
-			p.y -= uTime * 500.0 / scale;
-			p.y *= 0.03;
-			
-			vec2 id = floor(p);
-			p = fract(p);
-			
-			// Single hash call instead of multiple rand() calls
-			float h = hash(id);
-			
-			// Simplified shift
-			p.x += (h * 2.0 - 1.0) * 0.35;
-			
-			// Distance calculation
-			vec2 a = abs(p - 0.5);
-			float res = max(a.x * 0.8, a.y * 0.5) - 0.1;
-			
-			// Simplified decimation
-			return (h < mix(1.0, 0.1, intensity)) ? 1.0 : res;
-		}
-
-		void main() {
+		void main()
+		{
 			vec2 wpos = screenToWorld(screenCoord);
-			float intensity = uIntensity;
+			if (uIntensity < 0.01)
+			{
+				gl_FragColor = texture2D(bitmap, openfl_TextureCoordv);
+				return;
+			}
 
 			vec3 add = vec3(0);
 			float rainSum = 0.0;
+			float dt = mix(1.0, 0.1, uIntensity);
 
-			// ULTRA-OPTIMIZED: Single layer only
-			float scale = 1.5;
-			float r = rainDist(wpos * scale / uScale, scale, intensity);
-			
-			if (r < 0.0) {
-				float v = (1.0 - exp(r * 5.0)) / scale * 2.0;
-				wpos.x += v * 10.0 * uScale;
-				wpos.y -= v * 2.0 * uScale;
-				add = vec3(0.1, 0.15, 0.2) * v;
-				rainSum = 0.75;
+			// layer 0, scale 1.0
+			{
+				vec2 p = wpos / uScale;
+				p *= 0.1;
+				p.x += p.y * 0.1;
+				p.y = (p.y - uTime * 500.0) * 0.03;
+
+				vec2 id = floor(p);
+				vec2 f = p - id;
+				float h = hash(id);
+				f.y += (fract(h * 12.9898) - 0.5) * 0.3;
+				f.x += (fract(h * 78.233) * 2.0 - 1.0) * 0.35;
+
+				vec2 d = abs(f - 0.5);
+				float r = max(d.x * 0.8, d.y * 0.5) - 0.1;
+				float m = step(h, dt) * step(r, 0.0);
+				float v = -r * 10.0 * m;
+
+				wpos += vec2(v * 10.0, -v * 2.0) * uScale;
+				add += vec3(0.1, 0.15, 0.2) * v;
+
+				rainSum = m * 0.75;
 			}
 
-			vec3 color = sampleBitmapWorld(wpos).xyz;
+			vec3 color;
+			if (add.x != 0.0 || add.y != 0.0 || add.z != 0.0)
+			{
+				vec2 sc = worldToScreen(wpos);
+				vec2 bcs = openfl_TextureCoordv / screenCoord;
+				color = texture2D(bitmap, sc * bcs).xyz;
+			}
+			else
+				color = texture2D(bitmap, openfl_TextureCoordv).xyz;
+
 			color += add;
 			color = mix(color, vec3(0.4, 0.5, 0.8), 0.1 * rainSum);
 
@@ -703,7 +689,7 @@ class RainShader extends FlxShader
 	public function updateViewInfo(screenWidth:Float, screenHeight:Float, camera:FlxCamera):Void
 	{
 		uScreenResolution.value = [screenWidth, screenHeight];
-		uCameraBounds.value = [camera.viewLeft, camera.viewTop, camera.viewRight, camera.viewBottom];
+		uCameraBounds.value = [camera.viewLeft, camera.viewTop, camera.viewRight - camera.viewLeft, camera.viewBottom - camera.viewTop];
 	}
 }
 

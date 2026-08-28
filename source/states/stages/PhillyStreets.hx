@@ -135,10 +135,8 @@ class PhillyStreets extends BaseStage
 		updateABotEye(true);
 		add(abot);
 		
-		// #if !switch // The Switch has performance issues with this shader
 		if (ClientPrefs.data.shaders)
 			setupRainShader();
-		// #end
 
 		var _song = PlayState.SONG;
 		if(_song.gameOverSound == null || _song.gameOverSound.trim().length < 1) GameOverSubstate.deathSoundName = 'fnf_loss_sfx-pico';
@@ -864,6 +862,15 @@ class PhillyStreets extends BaseStage
 	{
 		if(ClientPrefs.data.lowQuality) return;
 
+		#if switch
+		while (casingGroup.members.length >= 10)
+		{
+			var old = casingGroup.members[0];
+			casingGroup.remove(old, true);
+			old.destroy();
+		}
+		#end
+
 		var casing:FlxSprite = new FlxSprite(boyfriend.x + 250, boyfriend.y + 100);
 		casing.frames = casingFrames;
 		casing.animation.addByPrefix('pop', 'Pop0', 24, false);
@@ -1014,13 +1021,15 @@ class PhillyStreets extends BaseStage
 		// Darken the background, then fade it back.
 		for (sprite in darkenable)
 		{
-			// If not excluded, darken.
 			sprite.color = 0xFF111111;
-			new FlxTimer().start(1/24, (tmr) ->
+		}
+		new FlxTimer().start(1/24, (tmr) ->
+		{
+			for (sprite in darkenable)
 			{
 				sprite.color = 0xFF222222;
 				FlxTween.color(sprite, 1.4, 0xFF222222, 0xFFFFFFFF);
-			});
-		}
+			}
+		});
 	}
 }
