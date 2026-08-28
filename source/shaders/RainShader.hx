@@ -581,10 +581,13 @@ class RainShader extends FlxShader
 	', true)
 	@:glFragmentSource("
 		#pragma header
+		precision mediump float;
 
 		uniform float uScale;
 		uniform float uIntensity;
 		uniform float uTime;
+		uniform float uInvScale;
+		uniform vec2 uCameraBoundsInvSize;
 
 		float hash(vec2 a)
 		{
@@ -594,6 +597,7 @@ class RainShader extends FlxShader
 		void main()
 		{
 			vec2 wpos = screenToWorld(screenCoord);
+
 			if (uIntensity < 0.01)
 			{
 				gl_FragColor = texture2D(bitmap, openfl_TextureCoordv);
@@ -606,7 +610,7 @@ class RainShader extends FlxShader
 
 			// layer 0, scale 1.0
 			{
-				vec2 p = wpos / uScale;
+				vec2 p = wpos * uInvScale;
 				p *= 0.1;
 				p.x += p.y * 0.1;
 				p.y = (p.y - uTime * 500.0) * 0.03;
@@ -628,15 +632,13 @@ class RainShader extends FlxShader
 				rainSum = m * 0.75;
 			}
 
-			vec3 color;
-			if (add.x != 0.0 || add.y != 0.0 || add.z != 0.0)
-			{
-				vec2 sc = worldToScreen(wpos);
-				vec2 bcs = openfl_TextureCoordv / screenCoord;
-				color = texture2D(bitmap, sc * bcs).xyz;
-			}
-			else
-				color = texture2D(bitmap, openfl_TextureCoordv).xyz;
+			// branchless texture lookup: always compute displaced UV,
+			// select based on rainSum to avoid warp divergence
+			vec2 bcs = openfl_TextureCoordv / screenCoord;
+			vec2 displacedUV = (wpos - uCameraBounds.xy) * uCameraBoundsInvSize * bcs;
+			float isRain = step(0.01, rainSum);
+			vec2 finalUV = mix(openfl_TextureCoordv, displacedUV, isRain);
+			vec3 color = texture2D(bitmap, finalUV).xyz;
 
 			color += add;
 			color = mix(color, vec3(0.4, 0.5, 0.8), 0.1 * rainSum);
@@ -660,6 +662,7 @@ class RainShader extends FlxShader
 	function set_scale(value:Float):Float
 	{
 		this.uScale.value[0] = value;
+		this.uInvScale.value[0] = 1.0 / value;
 		return scale = value;
 	}
 
@@ -677,8 +680,10 @@ class RainShader extends FlxShader
 		super();
 		this.uTime.value = [1.0];
 		this.uScale.value = [1.0];
+		this.uInvScale.value = [1.0];
 		this.uIntensity.value = [0.5];
 		this.uScreenResolution.value = [FlxG.width, FlxG.height];
+		this.uCameraBoundsInvSize.value = [0.0, 0.0];
 	}
 
 	public function update(elapsed:Float):Void
@@ -690,6 +695,9 @@ class RainShader extends FlxShader
 	{
 		uScreenResolution.value = [screenWidth, screenHeight];
 		uCameraBounds.value = [camera.viewLeft, camera.viewTop, camera.viewRight - camera.viewLeft, camera.viewBottom - camera.viewTop];
+		var w = camera.viewRight - camera.viewLeft;
+		var h = camera.viewBottom - camera.viewTop;
+		uCameraBoundsInvSize.value = [w > 0 ? 1.0 / w : 0.0, h > 0 ? 1.0 / h : 0.0];
 	}
 }
 

@@ -4,6 +4,11 @@ package states.stages.objects;
 import funkin.vis.dsp.SpectralAnalyzer;
 #end
 
+#if (switch && funkin.vis)
+import cpp.vm.Thread;
+import cpp.vm.Lock;
+#end
+
 class ABotSpeaker extends FlxSpriteGroup
 {
 	final VIZ_MAX = 7; //ranges from viz1 to viz7
@@ -19,6 +24,15 @@ class ABotSpeaker extends FlxSpriteGroup
 	#if funkin.vis
 	var analyzer:SpectralAnalyzer;
 	#end
+
+	#if (switch && funkin.vis)
+	var _fftThread:Thread;
+	var _dataLock:Lock;
+	var _resultLock:Lock;
+	var _fftRunning:Bool;
+	var _resultValues:Array<Float>;
+	#end
+
 	var volumes:Array<Float> = [];
 
 	public var snd(default, set):FlxSound;
@@ -92,32 +106,25 @@ class ABotSpeaker extends FlxSpriteGroup
 	#if funkin.vis
 	var levels:Array<Bar>;
 	var levelMax:Int = 0;
-	var _vizTimer:Float = 0;
-	#if switch
-	final VIZ_UPDATE_RATE:Float = 0.05;
-	var _superTimer:Float = 0;
-	#end
 	#end
 	override function update(elapsed:Float):Void
 	{
-		#if (switch && funkin.vis)
-		_vizTimer += elapsed;
-		_superTimer += elapsed;
-		if (_vizTimer < VIZ_UPDATE_RATE)
-		{
-			if (_superTimer < 0.05) return;
-			_superTimer = 0;
-			super.update(elapsed);
-			return;
-		}
-		_vizTimer = 0;
-		_superTimer = 0;
-		#end
-
 		super.update(elapsed);
 		#if funkin.vis
 		if(analyzer == null) return;
 
+		#if switch
+		if (_resultLock != null && _resultLock.wait(0))
+		{
+			for (i in 0...Std.int(Math.min(vizSprites.length, _resultValues.length)))
+			{
+				var animFrame:Int = Math.round(_resultValues[i] * 5);
+				animFrame = Std.int(Math.abs(FlxMath.bound(animFrame, 0, 5) - 5));
+				vizSprites[i].animation.curAnim.curFrame = animFrame;
+			}
+			_dataLock.release();
+		}
+		#else
 		levels = analyzer.getLevels(levels);
 		var oldLevelMax = levelMax;
 		levelMax = 0;
@@ -125,16 +132,15 @@ class ABotSpeaker extends FlxSpriteGroup
 		{
 			var animFrame:Int = Math.round(levels[i].value * 5);
 			animFrame = Std.int(Math.abs(FlxMath.bound(animFrame, 0, 5) - 5));
-
 			vizSprites[i].animation.curAnim.curFrame = animFrame;
 			levelMax = Std.int(Math.max(levelMax, 5 - animFrame));
 		}
-
 		if(levelMax >= 4)
 		{
 			if(oldLevelMax <= levelMax && (levelMax >= 5 || speaker.anim.curFrame >= 3))
 				beatHit();
 		}
+		#end
 		#end
 	}
 
@@ -155,7 +161,33 @@ class ABotSpeaker extends FlxSpriteGroup
 		#if desktop
 		analyzer.fftN = 256;
 		#end
+
+		#if switch
+		_resultValues = [];
+		for (i in 0...7) _resultValues.push(0.0);
+		_dataLock = new Lock();
+		_resultLock = new Lock();
+		_fftRunning = true;
+		_dataLock.release();
+		_fftThread = Thread.create(fftWorker);
+		#end
 	}
+
+	#if switch
+	function fftWorker()
+	{
+		while (_fftRunning)
+		{
+			_dataLock.wait();
+			if (!_fftRunning)
+				break;
+			var bars = analyzer.getLevels();
+			for (i in 0..._resultValues.length)
+				_resultValues[i] = (i < bars.length) ? bars[i].value : 0.0;
+			_resultLock.release();
+		}
+	}
+	#end
 	#end
 
 	var lookingAtRight:Bool = true;
