@@ -31,7 +31,6 @@ import slushi.nx.controls.NXVibrationHD;
 
 import slushi.states.freeplay.SlushiFreeplayState;
 import slushi.states.SwitchTitleState;
-import slushi.fixes.OpenFLVideoSprite;
 import slushi.SlushiMain;
 import slushi.SlDebug;
 import slushi.SlGame;

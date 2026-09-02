@@ -2,7 +2,7 @@
 <project>
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="FNF: Switch Funkin'" file="SwitchFunkin" packageName="com.slushi.switchfunkin" package="com.slushi.switchfunkin" main="Main" version="1.1.0" company="Slushi" />
+	<app title="FNF: Switch Funkin'" file="SwitchFunkin" packageName="com.slushi.switchfunkin" package="com.slushi.switchfunkin" main="Main" version="1.2.0" company="Slushi" />
 
 	<!--Switch Export with Unique ApplicationID and Icon 
 	(Slushi Note: Where is this supposed to be used? In normal Lime, APP_ID isn't really used...)-->
@@ -17,23 +17,23 @@
 	<!-- ______________________ SWITCH FUNKIN' CUSTOMIZATION ______________________ -->
 	<assets path="assets/SwitchFunkinAssets" rename="assets/SwitchFunkinAssets" include="*"/>
 
-	<!-- Allow touch controls for PlayState -->
-	<define name="TOUCH_CONTROLS_ALLOWED" if="switch"/>
-
-	<!-- Enable videos for Switch build (not working yet) -->
-	<!-- <define name="VIDEOS_ALLOWED" if="switch"/> -->
-
-	<!-- Disable Nene Visualizer (Like on Weekend 1) for performance reasons on Switch -->
-	<define name="DISABLE_NENE_VISUALIZER" if="switch"/>
-
 	<section if="switch">
+		<!-- Allow touch controls for PlayState -->
+		<define name="TOUCH_CONTROLS_ALLOWED" />
+
+		<!-- Enable videos for Switch build -->
+		<define name="VIDEOS_ALLOWED" />
+
 		<!-- Required for Switch for use the correct renderer -->
-		<haxedef name="lime-opengl" if="switch" />
-		<haxedef name="lime-cairo" value="false" if="switch" />
-		<set name="LIME_CAIRO" value="0" if="switch" />
-		<set name="LIME_OPENGL" value="1" if="switch" />
+		<haxedef name="lime-opengl" />
+		<haxedef name="lime-cairo" value="false" />
+		<set name="LIME_CAIRO" value="0" />
+		<set name="LIME_OPENGL" value="1" />
 
 		<haxelib name="hx_libnx"/>
+		<haxelib name="hxswitchvideo"/>
+
+		<define name="SWITCHVIDEO_LOGGING" if="hxswitchvideo"/>
 
 		<!-- CHANGE THIS TO YOUR SWITCH IP -->
 		<config:switch ip="192.168.1.140"/>
@@ -104,8 +104,8 @@
 	<section if="BASE_GAME_FILES">
 		<assets path="assets/base_game" rename="assets" exclude="*.ogg" if="web"/>
 		<assets path="assets/base_game" rename="assets" exclude="*.mp3"  unless="web"/>
-		<haxelib name="grig.audio" if="BASE_GAME_FILES" unless="DISABLE_NENE_VISUALIZER"/>
-		<haxelib name="funkin.vis" if="BASE_GAME_FILES" unless="DISABLE_NENE_VISUALIZER"/>
+		<haxelib name="grig.audio" if="BASE_GAME_FILES"/>
+		<haxelib name="funkin.vis" if="BASE_GAME_FILES"/>
 	</section>
 
 	<define name="CHECK_FOR_UPDATES" if="desktop officialBuild || switch"/>

@@ -96,6 +96,13 @@ class Main extends Sprite
 		hxvlc.util.Handle.init(#if (hxvlc >= "1.8.0")  ['--no-lua'] #end);
 		#end
 
+		#if (switch && hxswitchvideo)
+		switchvideo.backend.SwitchVideoLog.logCallBack = function(msg:String, ?pos:haxe.PosInfos)
+		{
+			SlDebug.log(msg, INFO, pos);
+		}
+		#end
+
 		#if LUA_ALLOWED
 		Mods.pushGlobalMods();
 		#end
@@ -272,7 +279,7 @@ class Main extends Sprite
 		}
 
 		errMsg += "\nError: " + e.error;
-		errMsg += "\n--------\nPlease report this error to the GitHub page: https://github.com/Slushi-Github/Switch-Funkin/issues\n";
+		errMsg += "\n--------\nPlease report this error to the GitHub page:\nhttps://github.com/Slushi-Github/Switch-Funkin/issues\n";
 
 		#if !switch
 		if (!FileSystem.exists("./crash/"))

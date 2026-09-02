@@ -4,6 +4,11 @@ package states.stages.objects;
 import funkin.vis.dsp.SpectralAnalyzer;
 #end
 
+#if (switch && funkin.vis)
+import cpp.vm.Thread;
+import cpp.vm.Lock;
+#end
+
 class ABotSpeaker extends FlxSpriteGroup
 {
 	final VIZ_MAX = 7; //ranges from viz1 to viz7
@@ -20,6 +25,14 @@ class ABotSpeaker extends FlxSpriteGroup
 	var analyzer:SpectralAnalyzer;
 	#end
 	var volumes:Array<Float> = [];
+
+	#if (switch && funkin.vis)
+	var _fftThread:Thread;
+	var _dataLock:Lock;
+	var _resultLock:Lock;
+	var _fftRunning:Bool;
+	var _resultValues:Array<Float>;
+	#end
 
 	public var snd(default, set):FlxSound;
 	function set_snd(changed:FlxSound)
@@ -79,41 +92,63 @@ class ABotSpeaker extends FlxSpriteGroup
 		speaker.anim.addBySymbol('anim', 'Abot System', 24, false);
 		speaker.anim.play('anim', true);
 		speaker.anim.curFrame = speaker.anim.length - 1;
-		speaker.antialiasing = antialias;
+		speaker.antialiasing = #if switch false #else antialias #end;
 		add(speaker);
+
+		#if switch
+		eyes.active = false;
+		speaker.active = false;
+		#end
 	}
 
 	#if funkin.vis
 	var levels:Array<Bar>;
 	var levelMax:Int = 0;
+	#end
+
 	override function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
-		if(analyzer == null) return;
+		#if funkin.vis
+		if (analyzer == null)
+			return;
 
+		#if switch
+		if (_resultLock != null && _resultLock.wait(0))
+		{
+			for (i in 0...Std.int(Math.min(vizSprites.length, _resultValues.length)))
+			{
+				var animFrame:Int = Math.round(_resultValues[i] * 5);
+				animFrame = Std.int(Math.abs(FlxMath.bound(animFrame, 0, 5) - 5));
+				vizSprites[i].animation.curAnim.curFrame = animFrame;
+			}
+			_dataLock.release();
+		}
+		#else
 		levels = analyzer.getLevels(levels);
 		var oldLevelMax = levelMax;
 		levelMax = 0;
 		for (i in 0...Std.int(Math.min(vizSprites.length, levels.length)))
 		{
 			var animFrame:Int = Math.round(levels[i].value * 5);
-			animFrame = Std.int(Math.abs(FlxMath.bound(animFrame, 0, 5) - 5)); // shitty dumbass flip, cuz dave got da shit backwards lol!
-		
+			animFrame = Std.int(Math.abs(FlxMath.bound(animFrame, 0, 5) - 5));
 			vizSprites[i].animation.curAnim.curFrame = animFrame;
 			levelMax = Std.int(Math.max(levelMax, 5 - animFrame));
 		}
-
-		if(levelMax >= 4)
+		if (levelMax >= 4)
 		{
-			//SlDebug.log(levelMax);
-			if(oldLevelMax <= levelMax && (levelMax >= 5 || speaker.anim.curFrame >= 3))
+			if (oldLevelMax <= levelMax && (levelMax >= 5 || speaker.anim.curFrame >= 3))
 				beatHit();
 		}
+		#end
+		#end
 	}
-	#end
 
 	public function beatHit()
 	{
+		#if switch
+		speaker.active = true;
+		#end
 		speaker.anim.play('anim', true);
 	}
 
@@ -128,18 +163,55 @@ class ABotSpeaker extends FlxSpriteGroup
 		// So we want to manually change it!
 		analyzer.fftN = 256;
 		#end
+
+		#if switch
+		_resultValues = [];
+		for (i in 0...7)
+			_resultValues.push(0.0);
+		_dataLock = new Lock();
+		_resultLock = new Lock();
+		_fftRunning = true;
+		_dataLock.release();
+		_fftThread = Thread.create(fftWorker);
+		#end
 	}
+
+	#if switch
+	function fftWorker()
+	{
+		while (_fftRunning)
+		{
+			_dataLock.wait();
+			if (!_fftRunning)
+				break;
+			var bars = analyzer.getLevels();
+			for (i in 0..._resultValues.length)
+				_resultValues[i] = (i < bars.length) ? bars[i].value : 0.0;
+			_resultLock.release();
+		}
+	}
+	#end
 	#end
 
 	var lookingAtRight:Bool = true;
 	public function lookLeft()
 	{
-		if(lookingAtRight) eyes.anim.play('lookleft', true);
+		if(lookingAtRight) {
+			#if switch
+			eyes.active = true;
+			#end
+			eyes.anim.play('lookleft', true);
+		}
 		lookingAtRight = false;
 	}
 	public function lookRight()
 	{
-		if(!lookingAtRight) eyes.anim.play('lookright', true);
+		if(!lookingAtRight) {
+			#if switch
+			eyes.active = true;
+			#end
+			eyes.anim.play('lookright', true);
+		}
 		lookingAtRight = true;
 	}
 }

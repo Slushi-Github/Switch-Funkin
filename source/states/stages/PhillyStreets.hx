@@ -864,6 +864,15 @@ class PhillyStreets extends BaseStage
 	{
 		if(ClientPrefs.data.lowQuality) return;
 
+		#if switch
+		while (casingGroup.members.length >= 10)
+		{
+			final old = casingGroup.members[0];
+			casingGroup.remove(old, true);
+			old.destroy();
+		}
+		#end
+
 		var casing:FlxSprite = new FlxSprite(boyfriend.x + 250, boyfriend.y + 100);
 		casing.frames = casingFrames;
 		casing.animation.addByPrefix('pop', 'Pop0', 24, false);

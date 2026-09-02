@@ -60,8 +60,10 @@ jobs:
             switch-openal-soft switch-opusfile switch-pkg-config switch-sdl2 \
             switch-sdl2_gfx switch-sdl2_image switch-sdl2_mixer \
             switch-sdl2_net switch-sdl2_ttf switch-tools switch-zlib \
-            switch-liblua51
-      
+            switch-liblua51 switch-dav1d switch-ffmpeg switch-libarchive \
+            switch-libass switch-libexpat switch-libfribidi switch-libmpv \
+            switch-libplacebo switch-libzstd switch-lz4
+
       - name: Install Haxe libraries
         run: |
           echo === INSTALLING HAXE LIBRARIES ===
@@ -77,7 +79,7 @@ jobs:
           haxe compile.hxml
           cd -
           echo =========
-          haxelib --always --quiet git lime https://github.com/Slushi-Github/lime-nx.git
+          haxelib --always --quiet git lime https://github.com/Slushi-Github/lime-nx.git lime-9778682
           haxelib --always --quiet git hx_libnx https://github.com/Slushi-Github/hx_libnx.git
           haxelib list
           echo =========
@@ -87,10 +89,6 @@ jobs:
           echo === REBUILDING LIME FOR SWITCH ===
           haxelib run lime rebuild switch
           echo =========
-      
-      - name: Skip SScript setup mode
-        run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> ~/settings.cocoa
-      
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
       
