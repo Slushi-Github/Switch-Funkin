@@ -122,10 +122,10 @@ class ClientPrefs {
 		'debug_2'		=> [EIGHT]
 	];
 	public static var gamepadBinds:Map<String, Array<FlxGamepadInputID>> = [
-		'note_up'		=> [DPAD_UP, Y],
-		'note_left'		=> [DPAD_LEFT, X],
-		'note_down'		=> [DPAD_DOWN, A],
-		'note_right'	=> [DPAD_RIGHT, B],
+		'note_up'		=> [DPAD_UP, Y, RIGHT_SHOULDER],
+		'note_left'		=> [DPAD_LEFT, X, LEFT_TRIGGER],
+		'note_down'		=> [DPAD_DOWN, A, LEFT_SHOULDER],
+		'note_right'	=> [DPAD_RIGHT, B, RIGHT_TRIGGER],
 		
 		'ui_up'			=> [DPAD_UP, LEFT_STICK_DIGITAL_UP, RIGHT_STICK_DIGITAL_UP],
 		'ui_left'		=> [DPAD_LEFT, LEFT_STICK_DIGITAL_LEFT, RIGHT_STICK_DIGITAL_LEFT],
